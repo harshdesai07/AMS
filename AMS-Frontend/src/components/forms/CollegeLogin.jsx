@@ -51,6 +51,7 @@ export default function CollegeLogin() {
       if (response.ok) {
         console.log("Login Successful:", data.message);
         sessionStorage.setItem("collegeId", data.collegeId);
+        sessionStorage.setItem("collegeName", data.collegeName);  
         navigate("/collegeDashboard"); // Redirect to dashboard
       } else {
         setError(data.error || "Invalid credentials");

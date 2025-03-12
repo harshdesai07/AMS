@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Label } from "../ui/Label";
@@ -9,7 +9,9 @@ export default function StudentRegistration() {
   const navigate = useNavigate();
   const location = useLocation();
   const studentData = location.state?.student || null; // Get student data if updating
-  const { id } = useParams(); // Extract studentId from URL
+  const { id: paramId } = useParams();
+  const studentId = paramId || studentData?.studentId; // Fallback to studentData.studentId
+
 
   const [formData, setFormData] = useState({
     studentName: "",
@@ -32,18 +34,18 @@ export default function StudentRegistration() {
       const match = phoneNumber?.match(/^(\+\d{1,2})/); // Extracts +91, +1, etc.
       return match ? match[0] : "+1"; // Default to +1 if no match
     };
-  
+
     const extractPhoneNumber = (phoneNumber) => {
       return phoneNumber?.replace(/^(\+\d{1,2})/, "") || ""; // Remove country code
     };
-  
+
     // Convert DOB to "YYYY-MM-DD" format (required for input type="date")
     const formatDOB = (dob) => {
       if (!dob) return "";
       const date = new Date(dob);
       return date.toISOString().split("T")[0]; // Extracts "YYYY-MM-DD"
     };
-  
+
     if (studentData) {
       setFormData({
         studentName: studentData.studentName || "",
@@ -58,8 +60,8 @@ export default function StudentRegistration() {
         parentCountryCode: extractCountryCode(studentData.studentParentsNumber),
       });
     }
-  }, [studentData]);  
-  
+  }, [studentData]);
+
 
   const handleChange = (value, name) => {
     setFormData({ ...formData, [name]: value });
@@ -119,12 +121,12 @@ export default function StudentRegistration() {
       newErrors.studentDepartment = "Department is required";
       isValid = false;
     }
-    
+
     if (!formData.studentSem) {
       newErrors.studentSem = "Semester is required";
       isValid = false;
     }
-    
+
 
     setErrors(newErrors);
     return isValid;
@@ -136,7 +138,7 @@ export default function StudentRegistration() {
 
     const fullPhoneNumber = `${formData.countryCode}${formData.studentNumber}`;
     const parentFullPhoneNumber = `${formData.parentCountryCode}${formData.studentParentsNumber}`;
-    
+
     try {
       let response;
 
@@ -147,6 +149,10 @@ export default function StudentRegistration() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...formData, studentNumber: fullPhoneNumber, studentParentsNumber: parentFullPhoneNumber }),
         });
+
+        if (!response.ok) throw new Error("Update failed");
+
+        alert("Update successful!");
       }
       else {
         // Register new student
@@ -156,11 +162,13 @@ export default function StudentRegistration() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...formData, studentNumber: fullPhoneNumber, studentParentsNumber: parentFullPhoneNumber }),
         });
+
+        if (!response.ok) throw new Error("Registration failed");
+
+        alert("Registration successful!");
       }
 
-      if (!response.ok) throw new Error("Registration failed");
 
-      alert("Registration successful!");
       navigate("/collegeDashboard");
     } catch (error) {
       alert(error.message);
@@ -285,7 +293,7 @@ export default function StudentRegistration() {
 
 
           <Button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-          {studentData ? "Update Student" : "Register"}
+            {studentData ? "Update Student" : "Register"}
           </Button>
         </form>
       </div>

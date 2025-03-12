@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Label } from "../ui/Label";
@@ -25,37 +25,37 @@ export default function FacultyRegistration() {
   const [errors, setErrors] = useState({});
 
   // Pre-fill form if updating
-    useEffect(() => {
-      console.log("data recived", facultyData)
-      const extractCountryCode = (phoneNumber) => {
-        const match = phoneNumber?.match(/^(\+\d{1,2})/); // Extracts +91, +1, etc.
-        return match ? match[0] : "+1"; // Default to +1 if no match
-      };
-    
-      const extractPhoneNumber = (phoneNumber) => {
-        return phoneNumber?.replace(/^(\+\d{1,2})/, "") || ""; // Remove country code
-      };
-    
-      // Convert DOB to "YYYY-MM-DD" format (required for input type="date")
-      const formatDOB = (dob) => {
-        if (!dob) return "";
-        const date = new Date(dob);
-        return date.toISOString().split("T")[0]; // Extracts "YYYY-MM-DD"
-      };
-    
-      if (facultyData) {
-        setFormData({
-          facultyName: facultyData.facultyName || "",
-          facultyDob: formatDOB(facultyData.facultyDob), // Convert to correct format
-          facultyGender: facultyData.facultyGender || "",
-          facultyEmail: facultyData.facultyEmail || "",
-          facultyNumber: extractPhoneNumber(facultyData.facultyNumber),
-          facultyDepartment: facultyData.facultyDepartment || "",
-          facultyDesignation: facultyData.facultyDesignation || "",
-          countryCode: extractCountryCode(facultyData.facultyNumber),
-        });
-      }
-    }, [facultyData]);
+  useEffect(() => {
+    console.log("data recived", facultyData)
+    const extractCountryCode = (phoneNumber) => {
+      const match = phoneNumber?.match(/^(\+\d{1,2})/); // Extracts +91, +1, etc.
+      return match ? match[0] : "+1"; // Default to +1 if no match
+    };
+
+    const extractPhoneNumber = (phoneNumber) => {
+      return phoneNumber?.replace(/^(\+\d{1,2})/, "") || ""; // Remove country code
+    };
+
+    // Convert DOB to "YYYY-MM-DD" format (required for input type="date")
+    const formatDOB = (dob) => {
+      if (!dob) return "";
+      const date = new Date(dob);
+      return date.toISOString().split("T")[0]; // Extracts "YYYY-MM-DD"
+    };
+
+    if (facultyData) {
+      setFormData({
+        facultyName: facultyData.facultyName || "",
+        facultyDob: formatDOB(facultyData.facultyDob), // Convert to correct format
+        facultyGender: facultyData.facultyGender || "",
+        facultyEmail: facultyData.facultyEmail || "",
+        facultyNumber: extractPhoneNumber(facultyData.facultyNumber),
+        facultyDepartment: facultyData.facultyDepartment || "",
+        facultyDesignation: facultyData.facultyDesignation || "",
+        countryCode: extractCountryCode(facultyData.facultyNumber),
+      });
+    }
+  }, [facultyData]);
 
   const handleChange = (value, name) => {
     setFormData({ ...formData, [name]: value });
@@ -122,8 +122,8 @@ export default function FacultyRegistration() {
     if (!validateForm()) return;
 
     const fullPhoneNumber = `${formData.countryCode}${formData.facultyNumber}`;
-    
-    
+
+
     try {
       let response;
 
@@ -134,19 +134,26 @@ export default function FacultyRegistration() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...formData, facultyNumber: fullPhoneNumber }),
         });
+
+        if (!response.ok) throw new Error("Update failed");
+
+        alert("Update successful!");
       }
       else {
         // Register new faculty
-        response = await fetch("http://localhost:8080/facultyregister", {
+        const collegeId = sessionStorage.getItem("collegeId");
+        response = await fetch(`http://localhost:8080/facultyregister/${collegeId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...formData, facultyNumber: fullPhoneNumber }),
         });
+
+        if (!response.ok) throw new Error("Registration failed");
+
+        alert("Registration successful!");
       }
 
-      if (!response.ok) throw new Error("Registration failed");
 
-      alert("Registration successful!");
       navigate("/collegeDashboard");
     } catch (error) {
       alert(error.message);
@@ -243,7 +250,7 @@ export default function FacultyRegistration() {
           </div>
 
           <Button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-          {facultyData ? "Update Faculty" : "Register"}
+            {facultyData ? "Update Faculty" : "Register"}
           </Button>
         </form>
       </div>

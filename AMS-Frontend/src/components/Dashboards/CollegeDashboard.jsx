@@ -28,6 +28,7 @@ export default function CollegeDashboard() {
   const [error, setError] = useState(null);
   const [viewType, setViewType] = useState(null);
   const collegeId = sessionStorage.getItem("collegeId");
+  const collegeName = sessionStorage.getItem("collegeName");
 
   return (
     <div className="flex h-screen w-full bg-gray-100">
@@ -36,7 +37,7 @@ export default function CollegeDashboard() {
         className={`w-64 bg-white p-4 shadow-lg ${sidebarOpen ? "block" : "hidden"
           } md:block`}
       >
-        <h2 className="text-xl font-bold">College Admin</h2>
+        <h2 className="text-xl font-bold">{collegeName}</h2>
         <ul className="mt-4 space-y-4">
           <li className="flex items-center space-x-2 text-gray-700">
             <Users /> <span>Students</span>
@@ -68,10 +69,10 @@ export default function CollegeDashboard() {
               variant="default"
               className="flex items-center space-x-2"
               onClick={() => {
-                
-                
-                  navigate(`/studentRegistration/${collegeId}`);
-                
+
+
+                navigate(`/studentRegistration/${collegeId}`);
+
               }}
             >
               <PlusCircle /> <span>Add Student</span>
@@ -80,7 +81,12 @@ export default function CollegeDashboard() {
             <Button
               variant="default"
               className="flex items-center space-x-2"
-              onClick={() => navigate("/facultyRegistration")}
+              onClick={() => {
+
+
+                navigate(`/facultyRegistration/${collegeId}`);
+
+              }}
             >
               <PlusCircle /> <span>Add Faculty</span>
             </Button>
@@ -91,16 +97,18 @@ export default function CollegeDashboard() {
             </Button>
 
             {/* View Faculty Button */}
-            <Button variant="outline" className="flex items-center space-x-2"  onClick={() => setViewType("faculty")}>
+            <Button variant="outline" className="flex items-center space-x-2" onClick={() => setViewType("faculty")}>
               <Eye /> <span>View Faculty</span>
             </Button>
           </div>
 
           {/* Student and Faculty List Table */}
           {error && <p className="text-red-500 mt-2">{error}</p>}
-          {viewType && <CollegeDataTable type={viewType} collegeId={collegeId} />}
+          {viewType && (viewType === "student" || viewType === "faculty") && (
+            <CollegeDataTable type={viewType} collegeId={collegeId} />
+          )}
 
-          
+
         </div>
 
 
