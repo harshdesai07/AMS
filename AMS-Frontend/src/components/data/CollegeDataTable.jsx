@@ -12,21 +12,22 @@ const CollegeDataTable = ({ type, collegeId }) => {
       fetchData();
     }
   }, [type, collegeId]);
+
   const fetchData = async () => {
     try {
       const response = await fetch(`${base_url}/${type}/${collegeId}`);
       if (!response.ok) throw new Error("Failed to fetch data");
       const result = await response.json();
-      setData(result || []); // Ensure data is always an array
+      setData(result || []);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setData([]); // Set an empty array on error
+      setData([]);
     }
   };
-  
+
   const handleUpdate = (item) => {
     const itemId = item.studentId || item.facultyId;
-    navigate(`/${type}Registration/${itemId}`, { state: { [type]: item } }); // Fix state key
+    navigate(`/${type}Registration/${itemId}`, { state: { [type]: item } });
   };
 
   const handleDelete = async (item) => {
@@ -49,9 +50,7 @@ const CollegeDataTable = ({ type, collegeId }) => {
     }
   };
 
-  // Fix type mapping issue
   const validType = type === "student" ? "student" : type === "faculty" ? "faculty" : null;
-
   if (!validType || data.length === 0) return null;
 
   const columns = {
@@ -65,37 +64,44 @@ const CollegeDataTable = ({ type, collegeId }) => {
   };
 
   return (
-    <div className="mt-4 shadow overflow-x-auto">
-      <h2 className="text-lg font-semibold mb-2">{validType === "student" ? "Student List" : "Faculty List"}</h2>
-      <table className="w-full border border-gray-300 border-collapse">
-        <thead>
-          <tr className="bg-gray-200 border border-gray-300">
-            {columns[validType]?.map((col, index) => (
-              <th key={index} className="p-2 border border-gray-300">{col}</th>
-            ))}
-            <th className="p-2 border border-gray-300">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.map((item) => (
-            <tr key={item.studentId || item.facultyId} className="hover:bg-gray-100 border border-gray-300">
-              {keys[validType]?.map((key, index) => (
-                <td key={index} className="p-2 border border-gray-300">{item[key]}</td>
+    <div className="mt-4 shadow overflow-hidden rounded-lg border border-gray-300">
+      <h2 className="text-lg font-semibold mb-2 px-4 py-2 bg-gray-200">
+        {validType === "student" ? "Student List" : "Faculty List"}
+      </h2>
+      <div className="overflow-x-auto">
+        <table className="table-auto min-w-max w-full border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200 border border-gray-300">
+              {columns[validType]?.map((col, index) => (
+                <th key={index} className="p-2 border border-gray-300 text-left whitespace-nowrap">
+                  {col}
+                </th>
               ))}
-              <td className="p-2 border border-gray-300 flex space-x-2">
-                <Button className="text-sm px-4 bg-blue-400 text-white hover:bg-blue-500" onClick={() => handleUpdate(item)}>
-                  Update
-                </Button>
-                <Button className="text-sm px-4 bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(item)}>
-                  Delete
-                </Button>
-              </td>
+              <th className="p-2 border border-gray-300 whitespace-nowrap">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data?.map((item) => (
+              <tr key={item.studentId || item.facultyId} className="hover:bg-gray-100 border border-gray-300">
+                {keys[validType]?.map((key, index) => (
+                  <td key={index} className="p-2 border border-gray-300 whitespace-nowrap">{item[key]}</td>
+                ))}
+                <td className="p-2 border border-gray-300 whitespace-nowrap flex gap-2">
+                  <Button className="text-xs px-3 bg-blue-400 text-white hover:bg-blue-500" onClick={() => handleUpdate(item)}>
+                    Update
+                  </Button>
+                  <Button className="text-xs px-3 bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(item)}>
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
+  
 };
 
 export default CollegeDataTable;

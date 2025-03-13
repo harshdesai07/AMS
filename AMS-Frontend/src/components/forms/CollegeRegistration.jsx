@@ -92,8 +92,17 @@ export default function CollegeRegistration() {
       if (response.ok) {
         alert("Registration successful!");
         navigate("/");
+      } else if (response.status === 409) {
+        // Handling duplicate entry case
+        if (responseData.message.includes("College already exists")) {
+          alert("This college name is already registered. Please use a different name.");
+        } else if (responseData.message.includes("Email already exists")) {
+          alert("This email is already registered. Please use a different email.");
+        } else {
+          alert("A duplicate entry exists. Please check your details.");
+        }
       } else {
-        alert("Registration failed");
+        alert(`Registration failed: ${responseData.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Network Error:", error);
