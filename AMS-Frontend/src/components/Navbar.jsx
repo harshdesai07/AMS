@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import download from "../assets/download.png";
 import LoginDropdown from "./ui/LoginDropdown";
+import { HiUserAdd } from "react-icons/hi";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,9 +23,10 @@ export default function Navbar() {
       {/* Desktop Buttons */}
       <div className="hidden md:flex gap-4">
         <Link to="/register">
-          <button className="bg-white text-blue-700 px-4 py-2 rounded-lg shadow-md hover:bg-blue-100 transition">
-            Registration
-          </button>
+        <button className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 shadow-md hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300">
+      <HiUserAdd className="w-5 h-5" />
+      Sign Up
+    </button>
         </Link>
         <LoginDropdown />
       </div>
@@ -41,10 +43,11 @@ export default function Navbar() {
       {isOpen && (
         <div className="absolute top-16 left-0 w-full bg-white shadow-md p-4 flex flex-col gap-4 md:hidden">
           <Link to="/register">
-            <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-              Registration
-            </button>
-          </Link>
+        <button className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 shadow-md hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300">
+      <HiUserAdd className="w-5 h-5" />
+      Sign Up
+    </button>
+        </Link>
           <LoginDropdown />
         </div>
       )}

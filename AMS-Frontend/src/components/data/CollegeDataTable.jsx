@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/Button";
+import ActionButtons from "../ui/ActionButtons";
 
 const CollegeDataTable = ({ type, collegeId }) => {
   const [data, setData] = useState([]);
@@ -87,21 +87,17 @@ const CollegeDataTable = ({ type, collegeId }) => {
                   <td key={index} className="p-2 border border-gray-300 whitespace-nowrap">{item[key]}</td>
                 ))}
                 <td className="p-2 border border-gray-300 whitespace-nowrap flex gap-2">
-                  <Button className="text-xs px-3 bg-blue-400 text-white hover:bg-blue-500" onClick={() => handleUpdate(item)}>
-                    Update
-                  </Button>
-                  <Button className="text-xs px-3 bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(item)}>
-                    Delete
-                  </Button>
+                  <ActionButtons onUpdate={() => handleUpdate(item)} onDelete={() => handleDelete(item)} />
                 </td>
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
     </div>
   );
-  
+
 };
 
 export default CollegeDataTable;
