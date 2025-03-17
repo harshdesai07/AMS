@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ActionButtons from "../ui/ActionButtons";
 
-const CollegeDataTable = ({ type, collegeId }) => {
+const CollegeDataTable = ({ type, collegeId, onNoRecords }) => {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
   const base_url = "http://localhost:8080";
+  const alertShown = useRef(false); 
 
   useEffect(() => {
     if (type && collegeId) {
@@ -14,14 +15,30 @@ const CollegeDataTable = ({ type, collegeId }) => {
   }, [type, collegeId]);
 
   const fetchData = async () => {
+    alertShown.current = false; 
+
     try {
       const response = await fetch(`${base_url}/${type}/${collegeId}`);
       if (!response.ok) throw new Error("Failed to fetch data");
+
       const result = await response.json();
       setData(result || []);
+
+      
+      if (!result || result.length === 0) {
+        if (!alertShown.current) {
+          alertShown.current = true;
+          onNoRecords(type);
+        }
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       setData([]);
+
+      if (!alertShown.current) {
+        alertShown.current = true;
+        onNoRecords(type);
+      }
     }
   };
 
@@ -92,12 +109,10 @@ const CollegeDataTable = ({ type, collegeId }) => {
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
     </div>
   );
-
 };
 
 export default CollegeDataTable;

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { LogIn, GraduationCap, User, Users } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { GraduationCap, LogIn, User, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginDropdown() {
@@ -23,14 +23,16 @@ export default function LoginDropdown() {
     <div className="relative inline-block" ref={dropdownRef}>
       {/* Login Button with smooth transition */}
       <motion.button
-        whileHover={{ scale: 1.07 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 text-white font-semibold rounded-full bg-gradient-to-r from-green-500 to-blue-600 shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out hover:from-green-600 hover:to-blue-700"
+        className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-full bg-gradient-to-r from-green-500 to-blue-600 shadow-md hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300"
         aria-expanded={isOpen}
       >
-        <LogIn className="w-5 h-5" /> Login
+        <LogIn className="w-5 h-5" />
+        Login
       </motion.button>
+
 
       {isOpen && (
         <motion.div

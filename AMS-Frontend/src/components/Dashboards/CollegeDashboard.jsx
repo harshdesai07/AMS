@@ -20,6 +20,10 @@ export default function CollegeDashboard() {
   const [viewType, setViewType] = useState(null);
   const collegeId = sessionStorage.getItem("collegeId");
   const collegeName = sessionStorage.getItem("collegeName");
+  const handleNoRecords = (type) => {
+    alert(`No ${type === "student" ? "students" : "faculty"} found.`);
+  };
+  
 
   return (
     <div className="flex h-screen w-full bg-gray-100 overflow-auto">
@@ -91,7 +95,8 @@ export default function CollegeDashboard() {
 
           </div>
 
-          {viewType && <CollegeDataTable type={viewType} collegeId={collegeId} />}
+          {viewType && <CollegeDataTable type={viewType} collegeId={collegeId} onNoRecords={handleNoRecords} />}
+
 
           {/* Stats Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

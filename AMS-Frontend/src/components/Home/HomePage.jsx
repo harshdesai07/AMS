@@ -1,4 +1,4 @@
-import Navbar from "../navbar";
+import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
 import Features from "./Features";
 import HowItWorks from "./HowItWorks";
