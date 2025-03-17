@@ -26,13 +26,14 @@ export default function LoginDropdown() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-full bg-gradient-to-r from-green-500 to-blue-600 shadow-md hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300"
+        className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium 
+                   rounded-full bg-gradient-to-r from-[#00c8ff] to-[#7a00f5] shadow-md 
+                   hover:shadow-[#00c8ff]/50 hover:scale-105 transition-all duration-300"
         aria-expanded={isOpen}
       >
         <LogIn className="w-5 h-5" />
         Login
       </motion.button>
-
 
       {isOpen && (
         <motion.div
@@ -40,7 +41,8 @@ export default function LoginDropdown() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="absolute right-0 mt-2 w-52 bg-white bg-opacity-90 backdrop-blur-lg shadow-xl rounded-lg border border-gray-300 overflow-hidden"
+          className="absolute right-0 mt-2 w-52 bg-[#26264d] backdrop-blur-lg shadow-xl 
+                     rounded-lg border border-[#33335a] overflow-hidden"
         >
           <ul className="py-2">
             {[
@@ -51,14 +53,15 @@ export default function LoginDropdown() {
               <motion.li
                 key={index}
                 whileHover={{
-                  backgroundColor: "rgba(0, 120, 255, 0.15)", // Stronger blue highlight
-                  boxShadow: "0px 5px 15px rgba(0, 120, 255, 0.3)", // More intense glow effect
-                  scale: 1.05, // Slightly larger pop-up effect
+                  backgroundColor: "rgba(0, 195, 255, 0.2)", // Light cyan glow
+                  boxShadow: "0px 5px 15px rgba(0, 195, 255, 0.3)", // Subtle blue glow
+                  scale: 1.05, // Slight pop-up effect
                   transition: { duration: 0.25, ease: "easeOut" }, // Faster transition
                 }}
               >
                 <button
-                  className="block w-full text-left px-4 py-3 flex items-center gap-3 text-gray-800 font-medium transition-all duration-300"
+                  className="block w-full text-left px-4 py-3 flex items-center gap-3 text-white 
+                             font-medium transition-all duration-300"
                   onClick={() => navigate(path)}
                 >
                   {icon} {label}

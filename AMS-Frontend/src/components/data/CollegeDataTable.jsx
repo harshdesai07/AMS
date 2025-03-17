@@ -6,7 +6,7 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords }) => {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
   const base_url = "http://localhost:8080";
-  const alertShown = useRef(false); 
+  const alertShown = useRef(false);
 
   useEffect(() => {
     if (type && collegeId) {
@@ -15,7 +15,7 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords }) => {
   }, [type, collegeId]);
 
   const fetchData = async () => {
-    alertShown.current = false; 
+    alertShown.current = false;
 
     try {
       const response = await fetch(`${base_url}/${type}/${collegeId}`);

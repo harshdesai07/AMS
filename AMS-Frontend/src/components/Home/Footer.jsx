@@ -1,8 +1,9 @@
 export default function Footer() {
-    return (
-      <footer className="bg-gray-800 text-white text-center p-4">
-        <p>© 2025 AMS. All Rights Reserved.</p>
-      </footer>
-    );
-  }
+  return (
+    <footer className="bg-[#1c1c3c] text-white text-center p-4 border-t border-[#33335a]">
+      <p>© 2025 AMS. All Rights Reserved.</p>
+    </footer>
+  );
+}
+
   
