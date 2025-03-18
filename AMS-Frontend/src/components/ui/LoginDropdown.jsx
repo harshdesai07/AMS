@@ -7,6 +7,7 @@ export default function LoginDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  
 
   // Close dropdown when clicking outside
   useEffect(() => {

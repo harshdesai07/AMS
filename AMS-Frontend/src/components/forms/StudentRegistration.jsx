@@ -15,8 +15,6 @@ export default function StudentRegistration() {
 
   const [formData, setFormData] = useState({
     studentName: "",
-    studentDob: "",
-    studentGender: "",
     studentEmail: "",
     studentNumber: "",
     studentParentsNumber: "",
@@ -39,18 +37,9 @@ export default function StudentRegistration() {
       return phoneNumber?.replace(/^(\+\d{1,2})/, "") || ""; // Remove country code
     };
 
-    // Convert DOB to "YYYY-MM-DD" format (required for input type="date")
-    const formatDOB = (dob) => {
-      if (!dob) return "";
-      const date = new Date(dob);
-      return date.toISOString().split("T")[0]; // Extracts "YYYY-MM-DD"
-    };
-
     if (studentData) {
       setFormData({
         studentName: studentData.studentName || "",
-        studentDob: formatDOB(studentData.studentDob), // Convert to correct format
-        studentGender: studentData.studentGender || "",
         studentEmail: studentData.studentEmail || "",
         studentNumber: extractPhoneNumber(studentData.studentNumber),
         studentParentsNumber: extractPhoneNumber(studentData.studentParentsNumber),
@@ -74,22 +63,6 @@ export default function StudentRegistration() {
 
     if (!formData.studentName.trim()) {
       newErrors.studentName = "Name is required";
-      isValid = false;
-    }
-
-    if (!formData.studentDob) {
-      newErrors.studentDob = "Date of Birth is required";
-      isValid = false;
-    } else {
-      const dob = new Date(formData.studentDob);
-      if (dob >= new Date()) {
-        newErrors.studentDob = "Date of Birth must be in the past";
-        isValid = false;
-      }
-    }
-
-    if (!formData.studentGender) {
-      newErrors.studentGender = "Gender is required";
       isValid = false;
     }
 
@@ -185,25 +158,6 @@ export default function StudentRegistration() {
             <Label>Name</Label>
             <Input type="text" value={formData.studentName} onChange={(e) => handleChange(e.target.value, "studentName")} />
             {errors.studentName && <p className="text-red-500 text-sm">{errors.studentName}</p>}
-          </div>
-
-          <div>
-            <Label>Date of Birth</Label>
-            <Input type="date" value={formData.studentDob} onChange={(e) => handleChange(e.target.value, "studentDob")} />
-            {errors.studentDob && <p className="text-red-500 text-sm">{errors.studentDob}</p>}
-          </div>
-
-          <div>
-            <Label>Gender</Label>
-            <Select onValueChange={(value) => handleChange(value, "studentGender")}>
-              <SelectTrigger>{formData.studentGender || "Select Gender"}</SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.studentGender && <p className="text-red-500 text-sm">{errors.studentGender}</p>}
           </div>
 
           <div>

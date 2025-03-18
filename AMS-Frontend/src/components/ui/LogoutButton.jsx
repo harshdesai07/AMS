@@ -1,18 +1,21 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "./Button";
 
 export default function LogoutButton() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear any user session data (if applicable)
     localStorage.removeItem("user");
     navigate("/"); // Redirect to Home page
   };
 
   return (
-    <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
+    <button
+      onClick={handleLogout}
+      className="flex items-center space-x-2 px-4 py-2 rounded-md 
+                 bg-[#0d0d2b] text-white border border-white 
+                 hover:bg-[#1a1a40] hover:text-gray-300 transition-colors"
+    >
       <span>Logout</span>
-    </Button>
+    </button>
   );
 }
