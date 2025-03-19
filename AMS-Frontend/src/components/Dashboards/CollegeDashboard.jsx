@@ -1,7 +1,8 @@
+import axios from 'axios';
 import { Calendar, Eye, Menu, PlusCircle, Upload, Users, X } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import CollegeDataTable from "../data/CollegeDataTable";
 import { Button } from "../ui/Button";
 import { Card, CardContent } from "../ui/Card";
@@ -21,28 +22,84 @@ export default function CollegeDashboard() {
   const [viewType, setViewType] = useState(null);
   const collegeId = sessionStorage.getItem("collegeId");
   const collegeName = sessionStorage.getItem("collegeName");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isStudentOpen, setIsStudentOpen] = useState(false);
+  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
+  const studentDropdownRef = useRef(null);
+  const facultyDropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (studentDropdownRef.current && !studentDropdownRef.current.contains(event.target)) {
+        setIsStudentOpen(false);
+      }
+      if (facultyDropdownRef.current && !facultyDropdownRef.current.contains(event.target)) {
+        setIsFacultyOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleNoRecords = (type) => {
     toast.error(`No ${type === "student" ? "students" : "faculty"} found.`);
   };
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event, type) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      console.error("No file selected.");
+      return;
+    }
     const file = event.target.files[0];
-    if (file) {
-      const fileType = file.type;
-      const validTypes = [
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      ];
+    if (!file) return;
+    console.log("File selected:", file);
 
-      if (validTypes.includes(fileType)) {
-        // Handle the Excel file upload here
-        toast.success('Excel file uploaded successfully!');
-      } else {
-        toast.error('Please upload only Excel files (.xls or .xlsx)');
-        event.target.value = ''; // Reset the input
+    const validTypes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    const fileType = file.type;
+
+    if (validTypes.includes(fileType)) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        let endpoint;
+        if (type === 'student') {
+          endpoint = `http://localhost:8080/uploadStudentExcel/${collegeId}`;
+        } else if (type === 'faculty') {
+          endpoint = `http://localhost:8080/uploadFacultyExcel/${collegeId}`;
+        } else if (type === 'subject') {
+          endpoint = `http://localhost:8080/uploadSubjects`;
+        }
+
+        const response = await axios.post(
+          endpoint,
+          formData,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+
+        if (response.status === 200) {
+          console.log("Upload success:", response);
+          toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} data uploaded successfully! Processing...`);
+
+          setTimeout(() => {
+            toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} data processed successfully!`);
+          }, 2000);
+        } else {
+          toast.error('File upload failed. Please try again.');
+        }
+      } catch (error) {
+        toast.error('Error uploading file: ' + error.message);
       }
+    } else {
+      toast.error('Please upload only Excel files (.xls or .xlsx)');
+      event.target.value = ''; // Reset the input
     }
   };
 
@@ -51,9 +108,8 @@ export default function CollegeDashboard() {
       <Toaster position="top-center" />
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-56 bg-white/10 backdrop-blur-lg p-6 shadow-2xl transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform md:relative md:translate-x-0 md:w-64`}
+        className={`fixed inset-y-0 left-0 z-50 w-56 bg-white/10 backdrop-blur-lg p-6 shadow-2xl transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform md:relative md:translate-x-0 md:w-64`}
       >
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-xl font-bold text-white">{collegeName}</h2>
@@ -94,28 +150,35 @@ export default function CollegeDashboard() {
 
         <div className="p-6 space-y-8">
           {/* Action Buttons */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="relative">
+          <div className="flex flex-wrap md:flex-nowrap gap-4">
+            {/* Student Actions */}
+            <div className="relative flex-1" ref={studentDropdownRef}>
               <Button
                 variant="default"
                 className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                  setIsStudentOpen(!isStudentOpen);
+                  setIsFacultyOpen(false);
+                }}
               >
-                Click Me
+                <PlusCircle className="w-5 h-5" /> <span>Add Student</span>
               </Button>
-              {isOpen && (
+              {isStudentOpen && (
                 <div className="absolute left-0 mt-2 w-full bg-white/10 backdrop-blur-lg rounded-lg shadow-lg border border-white/20 overflow-hidden z-50">
                   <button
                     className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors"
-                    onClick={() => { setIsOpen(false); navigate("/route1"); }}
+                    onClick={() => {
+                      setIsStudentOpen(false);
+                      navigate(`/studentRegistration/${collegeId}`);
+                    }}
                   >
-                    Go to Route 1
+                    Student Registration
                   </button>
                   <label className="relative w-full flex items-center justify-center cursor-pointer">
                     <input
                       type="file"
                       accept=".xls,.xlsx"
-                      onChange={handleFileUpload}
+                      onChange={(e) => handleFileUpload(e, 'student')}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     <div className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center">
@@ -126,31 +189,89 @@ export default function CollegeDashboard() {
                 </div>
               )}
             </div>
-            <Button
-              variant="default"
-              className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200"
-              onClick={() => navigate(`/facultyRegistration/${collegeId}`)}
-            >
-              <PlusCircle className="w-5 h-5" /> <span>Add Faculty</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="border border-white/20 text-white hover:bg-white/10 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200"
-              onClick={() =>
-                setViewType((prev) => (prev === "student" ? null : "student"))
-              }
-            >
-              <Eye className="w-5 h-5" /> <span>View Students</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="border border-white/20 text-white hover:bg-white/10 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200"
-              onClick={() =>
-                setViewType((prev) => (prev === "faculty" ? null : "faculty"))
-              }
-            >
-              <Eye className="w-5 h-5" /> <span>View Faculty</span>
-            </Button>
+
+            {/* Faculty Actions */}
+            <div className="relative flex-1" ref={facultyDropdownRef}>
+              <Button
+                variant="default"
+                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                onClick={() => {
+                  setIsFacultyOpen(!isFacultyOpen);
+                  setIsStudentOpen(false);
+                }}
+              >
+                <PlusCircle className="w-5 h-5" /> <span>Add Faculty</span>
+              </Button>
+              {isFacultyOpen && (
+                <div className="absolute left-0 mt-2 w-full bg-white/10 backdrop-blur-lg rounded-lg shadow-lg border border-white/20 overflow-hidden z-50">
+                  <button
+                    className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors"
+                    onClick={() => {
+                      setIsFacultyOpen(false);
+                      navigate(`/facultyRegistration/${collegeId}`);
+                    }}
+                  >
+                    Faculty Registration
+                  </button>
+                  <label className="relative w-full flex items-center justify-center cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".xls,.xlsx"
+                      onChange={(e) => handleFileUpload(e, 'faculty')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Excel
+                    </div>
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Add subject Button */}
+            <div className="relative flex-1">
+              <label className="relative w-full flex items-center justify-center cursor-pointer">
+                <input
+                  type="file"
+                  accept=".xls,.xlsx"
+                  onChange={(e) => handleFileUpload(e, 'subject')}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <Button
+                  variant="default"
+                  className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                >
+                  <PlusCircle className="w-5 h-5" /> <span>Add Subject</span>
+                </Button>
+              </label>
+            </div>
+
+            {/* View Students Button */}
+            <div className="relative flex-1">
+              <Button
+                variant="outline"
+                className="border border-white/20 text-white hover:bg-white/10 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                onClick={() =>
+                  setViewType((prev) => (prev === "student" ? null : "student"))
+                }
+              >
+                <Eye className="w-5 h-5" /> <span>View Students</span>
+              </Button>
+            </div>
+
+            {/* View Faculty Button */}
+            <div className="relative flex-1">
+              <Button
+                variant="outline"
+                className="border border-white/20 text-white hover:bg-white/10 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                onClick={() =>
+                  setViewType((prev) => (prev === "faculty" ? null : "faculty"))
+                }
+              >
+                <Eye className="w-5 h-5" /> <span>View Faculty</span>
+              </Button>
+            </div>
           </div>
 
           {viewType && (
