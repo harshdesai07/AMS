@@ -1,4 +1,4 @@
-import { Menu, X } from "lucide-react";
+import { Menu, X} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import download from "../../assets/download.png";
@@ -10,17 +10,20 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="w-full fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center 
-      bg-[#1c1c3c] shadow-md border-b border-[#33335a]">
+    <nav className="w-full fixed top-0 left-0 right-0 z-50 px-6 py-3 flex justify-between items-center 
+      bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
       
       {/* Logo & Brand Name */}
-      <div className="flex items-center gap-4">
-        <img
+      <div className="flex items-center gap-4 group">
+        <motion.img
           src={download}
           alt="Logo"
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full drop-shadow-md transition-all duration-300 hover:scale-105"
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-md"
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
         />
-        <h2 className="text-lg sm:text-2xl font-semibold text-white tracking-wide whitespace-nowrap">
+        <h2 className="text-lg sm:text-2xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 
+          bg-clip-text text-transparent tracking-wide whitespace-nowrap">
           Attendance System
         </h2>
       </div>
@@ -28,42 +31,51 @@ export default function Navbar() {
       {/* Desktop Navigation */}
       <div className="hidden md:flex gap-6 items-center">
         <Link to="/register">
-          <button className="flex items-center gap-2 px-4 sm:px-6 py-2 text-white text-sm font-medium rounded-full 
-            bg-gradient-to-r from-[#00c8ff] to-[#7a00f5] shadow-md transition-all duration-300 
-            hover:scale-105 hover:shadow-[#00c8ff]/50">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center gap-2 px-4 py-2 text-gray-800 text-sm font-medium rounded-full bg-gradient-to-r from-blue-300 to-blue-500 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
             <HiUserAdd className="w-5 h-5" />
             Sign Up
-          </button>
+          </motion.button>
         </Link>
         <LoginDropdown />
       </div>
 
       {/* Mobile Menu Button */}
-      <button
-        className="md:hidden text-white transition-all duration-300 hover:scale-110"
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="md:hidden text-gray-700 transition-colors hover:text-blue-600"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X size={28} /> : <Menu size={28} />}
-      </button>
+      </motion.button>
 
       {/* Mobile Dropdown Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-16 left-0 w-full bg-[#26264d] backdrop-blur-lg shadow-xl p-6 flex flex-col gap-5 
-              rounded-lg md:hidden transition-all duration-300 border border-[#33335a]"
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="absolute top-20 left-4 right-4 bg-white/90 backdrop-blur-lg shadow-lg p-6 
+              flex flex-col gap-5 rounded-2xl md:hidden border border-gray-100"
           >
             {/* Sign Up Button */}
             <Link to="/register">
-              <button className="flex items-center justify-center gap-2 px-4 py-2 text-white text-sm font-medium 
-                rounded-full bg-gradient-to-r from-[#00c8ff] to-[#7a00f5] shadow-md hover:scale-105 
-                transition-all duration-300 hover:shadow-[#00c8ff]/50">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-white text-sm 
+                  font-medium rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-md 
+                  hover:shadow-lg transition-shadow duration-300 ease-in-out"
+              >
                 <HiUserAdd className="w-5 h-5" />
                 Sign Up
-              </button>
+              </motion.button>
             </Link>
 
             {/* Login Button (Inside Dropdown) */}

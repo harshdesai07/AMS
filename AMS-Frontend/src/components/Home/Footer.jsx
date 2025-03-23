@@ -1,9 +1,8 @@
 export default function Footer() {
   return (
-    <footer className="bg-[#1c1c3c] text-white text-center p-4 border-t border-[#33335a]">
-      <p>© 2025 AMS. All Rights Reserved.</p>
+    <footer className="relative py-6 text-center overflow-hidden">
+      
+      <p className="relative z-10 text-gray-600 font-medium">© 2025 AMS. All Rights Reserved.</p>
     </footer>
   );
 }
-
-  

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Calendar, Eye, Menu, PlusCircle, Upload, Users, X } from "lucide-react";
+import { Calendar, Eye, Menu, PlusCircle, Upload, Users, X, BookOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -73,7 +73,7 @@ export default function CollegeDashboard() {
         } else if (type === 'faculty') {
           endpoint = `http://localhost:8080/uploadFacultyExcel/${collegeId}`;
         } else if (type === 'subject') {
-          endpoint = `http://localhost:8080/uploadSubjects`;
+          endpoint = `http://localhost:8080/uploadSubjects/${collegeId}`;
         }
 
         const response = await axios.post(
@@ -245,6 +245,17 @@ export default function CollegeDashboard() {
                   <PlusCircle className="w-5 h-5" /> <span>Add Subject</span>
                 </Button>
               </label>
+            </div>
+
+            {/* Course Department Button */}
+            <div className="relative flex-1">
+              <Button
+                variant="default"
+                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                onClick={() => navigate('/courseDepartment')}
+              >
+                <BookOpen className="w-5 h-5" /> <span>Course & Department</span>
+              </Button>
             </div>
 
             {/* View Students Button */}

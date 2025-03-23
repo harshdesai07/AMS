@@ -4,6 +4,7 @@ import CollegeDashboard from "./components/Dashboards/CollegeDashboard";
 import FacultyDashboard from "./components/Dashboards/FacultyDashboard";
 import StudentDashboard from "./components/Dashboards/StudentDashboard";
 import HomePage from "./components/Home/HomePage";
+import CourseDepartment from "./components/data/CourseDepartment";
 import CollegeLogin from "./components/forms/CollegeLogin";
 import CollegeRegistration from "./components/forms/CollegeRegistration";
 import FacultyLogin from "./components/forms/FacultyLogin";
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/studentRegistration" element={<StudentRegistration />} />
         <Route path="/studentRegistration/:studentId" element={<StudentRegistration />} />
         <Route path="/facultyRegistration/:facultyId" element={<FacultyRegistration />} />
+        <Route path="/CourseDepartment" element={<CourseDepartment />} />
       </Routes>
     </Router>
   );
