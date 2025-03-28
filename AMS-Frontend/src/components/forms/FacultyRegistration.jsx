@@ -1,4 +1,4 @@
-import { BookOpen, Building2, GraduationCap, Mail, Phone, User } from "lucide-react";
+import { BookOpen, Building2, GraduationCap, Mail, Phone, User, ArrowRight, Users } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -32,6 +32,21 @@ export default function FacultyRegistration() {
   const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
   const [isLoadingSemesters, setIsLoadingSemesters] = useState(false);
 
+  const designationOptions = [
+    { value: "", label: "Select Designation" },
+    { value: "Associate Professor", label: "Associate Professor" },
+    { value: "Assistant Professor", label: "Assistant Professor" },
+    { value: "HOD", label: "HOD" }
+  ];
+
+  const countryOptions = [
+    { code: "+1", label: "+1 (USA)" },
+    { code: "+91", label: "+91 (India)" },
+    { code: "+44", label: "+44 (UK)" },
+    { code: "+61", label: "+61 (AU)" },
+    { code: "+81", label: "+81 (JP)" }
+  ];
+
   useEffect(() => {
     const fetchCourses = async () => {
       setIsLoadingCourses(true);
@@ -64,7 +79,7 @@ export default function FacultyRegistration() {
 
       if (!response.ok) throw new Error('Failed to fetch course ID');
       const data = await response.json();
-      console.log(data); // Debugging log
+      console.log(data);
       return data;
     } catch (error) {
       console.error('Error fetching course ID:', error);
@@ -323,246 +338,259 @@ export default function FacultyRegistration() {
     }
   };
 
-  const countryOptions = [
-    { code: "+1", label: "+1 (USA)" },
-    { code: "+91", label: "+91 (India)" },
-    { code: "+44", label: "+44 (UK)" },
-    { code: "+61", label: "+61 (AU)" },
-    { code: "+81", label: "+81 (JP)" }
-  ];
-
-  const designationOptions = [
-    { value: "", label: "Select Designation" },
-    { value: "Associate Professor", label: "Associate Professor" },
-    { value: "Assistant Professor", label: "Assistant Professor" },
-    { value: "HOD", label: "HOD" }
-  ];
-
   return (
-    <div className="min-h-screen bg-[#0d0d2b] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <Toaster position="top-center" />
-      <div className="w-full max-w-xl bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-center mb-8">
-          <GraduationCap className="w-10 h-10 text-blue-400" />
-          <h2 className="text-3xl font-bold text-white ml-3">
-            {facultyData ? "Update Faculty" : "Faculty Registration"}
-          </h2>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <User className="w-5 h-5" />
-              <label className="text-sm font-medium">Name</label>
+      <div className="w-full max-w-xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+          {/* Header Section */}
+          <div className="px-8 pt-8 pb-6">
+            <div className="text-center">
+              <Users className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                {facultyData ? "Update Faculty" : "Faculty Registration"}
+              </h2>
+              <p className="text-base text-gray-600">Enter faculty information</p>
             </div>
-            <input
-              type="text"
-              value={formData.facultyName}
-              onChange={(e) => handleChange(e.target.value, "facultyName")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="Enter faculty name"
-            />
-            {errors.facultyName && (
-              <p className="text-red-400 text-sm mt-1">{errors.facultyName}</p>
-            )}
           </div>
 
-          {/* Email Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Mail className="w-5 h-5" />
-              <label className="text-sm font-medium">Email</label>
-            </div>
-            <input
-              type="email"
-              value={formData.facultyEmail}
-              onChange={(e) => handleChange(e.target.value, "facultyEmail")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="faculty@email.com"
-            />
-            {errors.facultyEmail && (
-              <p className="text-red-400 text-sm mt-1">{errors.facultyEmail}</p>
-            )}
-          </div>
+          <div className="px-8 pb-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.facultyName}
+                    onChange={(e) => handleChange(e.target.value, "facultyName")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                    placeholder="Enter faculty name"
+                  />
+                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.facultyName && (
+                  <p className="text-red-600 text-sm mt-1">{errors.facultyName}</p>
+                )}
+              </div>
 
-          {/* Course Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <GraduationCap className="w-5 h-5" />
-              <label className="text-sm font-medium">Course</label>
-            </div>
-            <select
-              value={formData.course}
-              onChange={(e) => handleChange(e.target.value, "course")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-              disabled={isLoadingCourses}
-            >
-              <option key="course-default" value="" className="bg-[#1a1a3f]">
-                {isLoadingCourses ? "Loading courses..." : "Select Course"}
-              </option>
-              {courses.map((course) => (
-                <option key={`course-${course.courseId}`} value={course.courseName} className="bg-[#1a1a3f]">
-                  {course.courseName}
-                </option>
-              ))}
-            </select>
-            {errors.course && (
-              <p className="text-red-400 text-sm mt-1">{errors.course}</p>
-            )}
-          </div>
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={formData.facultyEmail}
+                    onChange={(e) => handleChange(e.target.value, "facultyEmail")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                    placeholder="faculty@email.com"
+                  />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.facultyEmail && (
+                  <p className="text-red-600 text-sm mt-1">{errors.facultyEmail}</p>
+                )}
+              </div>
 
-          {/* Department Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Building2 className="w-5 h-5" />
-              <label className="text-sm font-medium">Department</label>
-            </div>
-            <select
-              value={formData.facultyDepartment}
-              onChange={(e) => handleChange(e.target.value, "facultyDepartment")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-              disabled={isLoadingDepartments || !formData.courseId}
-            >
-              <option key="department-default" value="" className="bg-[#1a1a3f]">
-                {isLoadingDepartments 
-                  ? "Loading departments..." 
-                  : !formData.courseId 
-                    ? "Select course first"
-                    : "Select Department"}
-              </option>
-              {departments.map((dept) => (
-                <option key={`department-${dept.departmentId}`} value={dept.departmentId} className="bg-[#1a1a3f]">
-                  {dept.departmentName}
-                </option>
-              ))}
-            </select>
-            {errors.facultyDepartment && (
-              <p className="text-red-400 text-sm mt-1">{errors.facultyDepartment}</p>
-            )}
-          </div>
+              {/* Course Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Course
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.course}
+                    onChange={(e) => handleChange(e.target.value, "course")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    disabled={isLoadingCourses}
+                  >
+                    <option value="">
+                      {isLoadingCourses ? "Loading courses..." : "Select Course"}
+                    </option>
+                    {courses.map((course) => (
+                      <option key={`course-${course.courseId}`} value={course.courseName}>
+                        {course.courseName}
+                      </option>
+                    ))}
+                  </select>
+                  <GraduationCap className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.course && (
+                  <p className="text-red-600 text-sm mt-1">{errors.course}</p>
+                )}
+              </div>
 
-          {/* Semester Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <GraduationCap className="w-5 h-5" />
-              <label className="text-sm font-medium">Semester</label>
-            </div>
-            <select
-              value={formData.semester}
-              onChange={(e) => handleChange(e.target.value, "semester")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-              disabled={isLoadingSemesters || !formData.facultyDepartment}
-            >
-              <option key="semester-default" value="" className="bg-[#1a1a3f]">
-                {isLoadingSemesters 
-                  ? "Loading semesters..." 
-                  : !formData.facultyDepartment 
-                    ? "Select department first"
-                    : "Select Semester"}
-              </option>
-              {semesters.map((sem) => (
-                <option key={`semester-${sem.semesterId}`} value={sem.id} className="bg-[#1a1a3f]">
-                  Semester {sem.semesterName}
-                </option>
-              ))}
-            </select>
-            {errors.semester && (
-              <p className="text-red-400 text-sm mt-1">{errors.semester}</p>
-            )}
-          </div>
+              {/* Department Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Department
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.facultyDepartment}
+                    onChange={(e) => handleChange(e.target.value, "facultyDepartment")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    disabled={isLoadingDepartments || !formData.courseId}
+                  >
+                    <option value="">
+                      {isLoadingDepartments 
+                        ? "Loading departments..." 
+                        : !formData.courseId 
+                          ? "Select course first"
+                          : "Select Department"}
+                    </option>
+                    {departments.map((dept) => (
+                      <option key={`department-${dept.departmentId}`} value={dept.departmentId}>
+                        {dept.departmentName}
+                      </option>
+                    ))}
+                  </select>
+                  <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.facultyDepartment && (
+                  <p className="text-red-600 text-sm mt-1">{errors.facultyDepartment}</p>
+                )}
+              </div>
 
-          {/* Subject Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <BookOpen className="w-5 h-5" />
-              <label className="text-sm font-medium">Subject</label>
-            </div>
-            <select
-              value={formData.subject}
-              onChange={(e) => handleChange(e.target.value, "subject")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-              disabled={isLoadingSubjects || !formData.semester}
-            >
-              <option key="subject-default" value="" className="bg-[#1a1a3f]">
-                {isLoadingSubjects 
-                  ? "Loading subjects..." 
-                  : !formData.semester
-                    ? "Select semester first"
-                    : "Select Subject"}
-              </option>
-              {subjects.map((subject) => (
-                <option key={`subject-${subject.id}`} value={subject.id} className="bg-[#1a1a3f]">
-                  {subject.name}
-                </option>
-              ))}
-            </select>
-            {errors.subject && (
-              <p className="text-red-400 text-sm mt-1">{errors.subject}</p>
-            )}
-          </div>
+              {/* Semester Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Semester
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.semester}
+                    onChange={(e) => handleChange(e.target.value, "semester")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    disabled={isLoadingSemesters || !formData.facultyDepartment}
+                  >
+                    <option value="">
+                      {isLoadingSemesters 
+                        ? "Loading semesters..." 
+                        : !formData.facultyDepartment 
+                          ? "Select department first"
+                          : "Select Semester"}
+                    </option>
+                    {semesters.map((sem) => (
+                      <option key={`semester-${sem.semesterId}`} value={sem.id}>
+                        Semester {sem.semesterName}
+                      </option>
+                    ))}
+                  </select>
+                  <GraduationCap className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.semester && (
+                  <p className="text-red-600 text-sm mt-1">{errors.semester}</p>
+                )}
+              </div>
 
-          {/* Designation Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <GraduationCap className="w-5 h-5" />
-              <label className="text-sm font-medium">Designation</label>
-            </div>
-            <select
-              value={formData.facultyDesignation}
-              onChange={(e) => handleChange(e.target.value, "facultyDesignation")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-            >
-              {designationOptions.map((option) => (
-                <option key={`designation-${option.value || 'default'}`} value={option.value} className="bg-[#1a1a3f]">
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            {errors.facultyDesignation && (
-              <p className="text-red-400 text-sm mt-1">{errors.facultyDesignation}</p>
-            )}
-          </div>
+              {/* Subject Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Subject
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.subject}
+                    onChange={(e) => handleChange(e.target.value, "subject")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    disabled={isLoadingSubjects || !formData.semester}
+                  >
+                    <option value="">
+                      {isLoadingSubjects 
+                        ? "Loading subjects..." 
+                        : !formData.semester
+                          ? "Select semester first"
+                          : "Select Subject"}
+                    </option>
+                    {subjects.map((subject) => (
+                      <option key={`subject-${subject.id}`} value={subject.id}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
+                  <BookOpen className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.subject && (
+                  <p className="text-red-600 text-sm mt-1">{errors.subject}</p>
+                )}
+              </div>
 
-          {/* Phone Number Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Phone className="w-5 h-5" />
-              <label className="text-sm font-medium">Phone Number</label>
-            </div>
-            <div className="flex space-x-2">
-              <select
-                value={formData.countryCode}
-                onChange={(e) => handleChange(e.target.value, "countryCode")}
-                className="w-24 px-2 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
+              {/* Designation Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Designation
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.facultyDesignation}
+                    onChange={(e) => handleChange(e.target.value, "facultyDesignation")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                  >
+                    {designationOptions.map((option) => (
+                      <option key={`designation-${option.value || 'default'}`} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <GraduationCap className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.facultyDesignation && (
+                  <p className="text-red-600 text-sm mt-1">{errors.facultyDesignation}</p>
+                )}
+              </div>
+
+              {/* Phone Number Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Phone Number
+                </label>
+                <div className="flex space-x-2">
+                  <div className="relative w-32">
+                    <select
+                      value={formData.countryCode}
+                      onChange={(e) => handleChange(e.target.value, "countryCode")}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    >
+                      {countryOptions.map((option) => (
+                        <option key={`country-${option.code}`} value={option.code}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </div>
+                  <div className="relative flex-1">
+                    <input
+                      type="tel"
+                      value={formData.facultyNumber}
+                      onChange={(e) => handleChange(e.target.value.replace(/\D/, ""), "facultyNumber")}
+                      maxLength={10}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                      placeholder="Phone number"
+                    />
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </div>
+                </div>
+                {errors.facultyNumber && (
+                  <p className="text-red-600 text-sm mt-1">{errors.facultyNumber}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center group text-lg mt-8"
               >
-                {countryOptions.map((option) => (
-                  <option key={`country-${option.code}`} value={option.code} className="bg-[#1a1a3f]">
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="tel"
-                value={formData.facultyNumber}
-                onChange={(e) => handleChange(e.target.value.replace(/\D/, ""), "facultyNumber")}
-                maxLength={10}
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-                placeholder="Phone number"
-              />
-            </div>
-            {errors.facultyNumber && (
-              <p className="text-red-400 text-sm mt-1">{errors.facultyNumber}</p>
-            )}
+                {facultyData ? "Update Faculty" : "Complete Registration"}
+                <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" />
+              </button>
+            </form>
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] mt-8"
-          >
-            {facultyData ? "Update Faculty" : "Complete Registration"}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Building2, GraduationCap, Lock, Mail, School } from "lucide-react";
+import { Building2, GraduationCap, Lock, Mail, School, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -117,149 +117,164 @@ export default function CollegeRegistration() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d2b] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <Toaster position="top-center" />
-      <div className="w-full max-w-xl bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-center mb-8">
-          <GraduationCap className="w-10 h-10 text-blue-400" />
-          <h2 className="text-3xl font-bold text-white ml-3">
-            College Registration
-          </h2>
+      <div className="w-full max-w-md mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+          {/* Header Section */}
+          <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6">
+            <div className="text-center">
+              <GraduationCap className="w-14 h-14 sm:w-16 sm:h-16 mx-auto text-blue-600 mb-3 sm:mb-4" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">College Registration</h2>
+              <p className="text-sm sm:text-base text-gray-600">Create your college account</p>
+            </div>
+          </div>
+
+          <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              {/* College Name Field */}
+              <div className="relative space-y-1 sm:space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  College Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="collegeName"
+                    value={formData.collegeName}
+                    onChange={handleChange}
+                    onFocus={() => setShowDropdown(true)}
+                    className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
+                    placeholder="Enter college name"
+                    autoComplete="off"
+                  />
+                  <School className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                {showDropdown && (
+                  <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-40 overflow-y-auto">
+                    {filteredColleges.map((college, index) => (
+                      <li
+                        key={index}
+                        onClick={() => handleSelectCollege(college)}
+                        className="p-2.5 sm:p-3 hover:bg-gray-50 cursor-pointer text-gray-700 text-sm sm:text-base"
+                      >
+                        {college}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {errors.collegeName && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1">{errors.collegeName}</p>
+                )}
+              </div>
+
+              {/* Email Field */}
+              <div className="space-y-1 sm:space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
+                    placeholder="your@college.edu"
+                  />
+                  <Mail className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                {errors.email && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1">{errors.email}</p>
+                )}
+              </div>
+
+              {/* Institution Type */}
+              <div className="space-y-1 sm:space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Type of Institution
+                </label>
+                <div className="relative">
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white text-sm sm:text-base"
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Private">Private</option>
+                    <option value="Government">Government</option>
+                    <option value="Autonomous">Autonomous</option>
+                  </select>
+                  <Building2 className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                {errors.type && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1">{errors.type}</p>
+                )}
+              </div>
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                <div className="space-y-1 sm:space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
+                      placeholder="••••••••"
+                    />
+                    <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
+                  {errors.password && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1">{errors.password}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1 sm:space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
+                      placeholder="••••••••"
+                    />
+                    <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1">{errors.confirmPassword}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center group text-sm sm:text-lg mt-6 sm:mt-8"
+              >
+                Complete Registration
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" />
+              </button>
+            </form>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* College Name Field */}
-          <div className="relative">
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <School className="w-5 h-5" />
-              <label className="text-sm font-medium">College Name</label>
-            </div>
-            <input
-              type="text"
-              name="collegeName"
-              value={formData.collegeName}
-              onChange={handleChange}
-              onFocus={() => setShowDropdown(true)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="Enter college name"
-              autoComplete="off"
-            />
-            {showDropdown && (
-              <ul className="absolute z-10 mt-1 w-full bg-[#1a1a3f] border border-white/10 rounded-lg shadow-xl max-h-40 overflow-y-auto">
-                {filteredColleges.map((college, index) => (
-                  <li
-                    key={index}
-                    onClick={() => handleSelectCollege(college)}
-                    className="p-3 hover:bg-white/5 cursor-pointer text-white"
-                  >
-                    {college}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {errors.collegeName && (
-              <p className="text-red-400 text-sm mt-1">{errors.collegeName}</p>
-            )}
-          </div>
-
-          {/* Email Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Mail className="w-5 h-5" />
-              <label className="text-sm font-medium">Email Address</label>
-            </div>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="your@email.com"
-            />
-            {errors.email && (
-              <p className="text-red-400 text-sm mt-1">{errors.email}</p>
-            )}
-          </div>
-
-          {/* Institution Type */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Building2 className="w-5 h-5" />
-              <label className="text-sm font-medium">Type of Institution</label>
-            </div>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-            >
-              <option value="" className="bg-[#1a1a3f]">
-                Select Type
-              </option>
-              <option value="Private" className="bg-[#1a1a3f]">
-                Private
-              </option>
-              <option value="Government" className="bg-[#1a1a3f]">
-                Government
-              </option>
-              <option value="Autonomous" className="bg-[#1a1a3f]">
-                Autonomous
-              </option>
-            </select>
-            {errors.type && (
-              <p className="text-red-400 text-sm mt-1">{errors.type}</p>
-            )}
-          </div>
-
-          {/* Password Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center space-x-2 text-white mb-2">
-                <Lock className="w-5 h-5" />
-                <label className="text-sm font-medium">Password</label>
-              </div>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-                placeholder="••••••••"
-              />
-              {errors.password && (
-                <p className="text-red-400 text-sm mt-1">{errors.password}</p>
-              )}
-            </div>
-
-            <div>
-              <div className="flex items-center space-x-2 text-white mb-2">
-                <Lock className="w-5 h-5" />
-                <label className="text-sm font-medium">Confirm Password</label>
-              </div>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-                placeholder="••••••••"
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-400 text-sm mt-1">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] mt-8"
-          >
-            Complete Registration
-          </button>
-        </form>
+        {/* Footer Text */}
+        <p className="text-center mt-4 sm:mt-6 text-gray-600 text-xs sm:text-sm">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
+            Sign in here
+          </a>
+        </p>
       </div>
     </div>
   );

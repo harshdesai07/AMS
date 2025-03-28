@@ -104,28 +104,28 @@ export default function CollegeDashboard() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#0d0d2b] overflow-hidden">
+    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
       <Toaster position="top-center" />
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-56 bg-white/10 backdrop-blur-lg p-6 shadow-2xl transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform md:relative md:translate-x-0 md:w-64`}
+        className={`fixed inset-y-0 left-0 z-50 w-56 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-64`}
       >
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-bold text-white">{collegeName}</h2>
+        <div className="flex justify-between items-center p-6">
+          <h2 className="text-xl font-bold text-gray-800">{collegeName}</h2>
           <Button
             variant="ghost"
-            className="md:hidden text-white hover:bg-white/10"
+            className="md:hidden text-gray-600 hover:bg-gray-100"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="w-5 h-5" />
           </Button>
         </div>
-        <ul className="space-y-6">
-          <li className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer transition-colors">
+        <ul className="p-4 space-y-2">
+          <li className="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-all duration-200">
             <Users className="w-5 h-5" /> <span>Students</span>
           </li>
-          <li className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer transition-colors">
+          <li className="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-all duration-200">
             <Calendar className="w-5 h-5" /> <span>Attendance</span>
           </li>
         </ul>
@@ -134,28 +134,28 @@ export default function CollegeDashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-auto">
         {/* Top Navigation */}
-        <div className="bg-white/10 backdrop-blur-lg p-4 shadow-lg sticky top-0 z-40">
+        <div className="bg-white shadow-sm p-4 sticky top-0 z-40">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden text-white hover:bg-white/10"
+              className="md:hidden text-gray-600 hover:bg-gray-100"
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <h2 className="text-xl font-bold text-white">Dashboard</h2>
-            <LogoutButton className="text-white hover:bg-white/10" />
+            <h2 className="text-xl font-bold text-gray-800">Dashboard</h2>
+            <LogoutButton className="text-gray-600 hover:bg-gray-100" />
           </div>
         </div>
 
-        <div className="p-6 space-y-8">
+        <div className="p-4 md:p-6 space-y-6 md:space-y-8">
           {/* Action Buttons */}
-          <div className="flex flex-wrap md:flex-nowrap gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Student Actions */}
-            <div className="relative flex-1" ref={studentDropdownRef}>
+            <div className="relative" ref={studentDropdownRef}>
               <Button
                 variant="default"
-                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 onClick={() => {
                   setIsStudentOpen(!isStudentOpen);
                   setIsFacultyOpen(false);
@@ -164,9 +164,9 @@ export default function CollegeDashboard() {
                 <PlusCircle className="w-5 h-5" /> <span>Add Student</span>
               </Button>
               {isStudentOpen && (
-                <div className="absolute left-0 mt-2 w-full bg-white/10 backdrop-blur-lg rounded-lg shadow-lg border border-white/20 overflow-hidden z-50">
+                <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-xl border overflow-hidden z-50 transform transition-all duration-200 scale-100 opacity-100">
                   <button
-                    className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors"
+                    className="w-full px-4 py-2 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     onClick={() => {
                       setIsStudentOpen(false);
                       navigate(`/studentRegistration/${collegeId}`);
@@ -181,7 +181,7 @@ export default function CollegeDashboard() {
                       onChange={(e) => handleFileUpload(e, 'student')}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <div className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center">
+                    <div className="w-full px-4 py-2 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center">
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Excel
                     </div>
@@ -191,10 +191,10 @@ export default function CollegeDashboard() {
             </div>
 
             {/* Faculty Actions */}
-            <div className="relative flex-1" ref={facultyDropdownRef}>
+            <div className="relative" ref={facultyDropdownRef}>
               <Button
                 variant="default"
-                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 onClick={() => {
                   setIsFacultyOpen(!isFacultyOpen);
                   setIsStudentOpen(false);
@@ -203,9 +203,9 @@ export default function CollegeDashboard() {
                 <PlusCircle className="w-5 h-5" /> <span>Add Faculty</span>
               </Button>
               {isFacultyOpen && (
-                <div className="absolute left-0 mt-2 w-full bg-white/10 backdrop-blur-lg rounded-lg shadow-lg border border-white/20 overflow-hidden z-50">
+                <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-xl border overflow-hidden z-50 transform transition-all duration-200 scale-100 opacity-100">
                   <button
-                    className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors"
+                    className="w-full px-4 py-2 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     onClick={() => {
                       setIsFacultyOpen(false);
                       navigate(`/facultyRegistration/${collegeId}`);
@@ -220,7 +220,7 @@ export default function CollegeDashboard() {
                       onChange={(e) => handleFileUpload(e, 'faculty')}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <div className="w-full px-4 py-2 text-left text-white hover:bg-white/10 transition-colors flex items-center">
+                    <div className="w-full px-4 py-2 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center">
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Excel
                     </div>
@@ -230,7 +230,7 @@ export default function CollegeDashboard() {
             </div>
 
             {/* Add subject Button */}
-            <div className="relative flex-1">
+            <div className="relative">
               <label className="relative w-full flex items-center justify-center cursor-pointer">
                 <input
                   type="file"
@@ -240,7 +240,7 @@ export default function CollegeDashboard() {
                 />
                 <Button
                   variant="default"
-                  className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                   <PlusCircle className="w-5 h-5" /> <span>Add Subject</span>
                 </Button>
@@ -248,21 +248,21 @@ export default function CollegeDashboard() {
             </div>
 
             {/* Course Department Button */}
-            <div className="relative flex-1">
+            <div className="relative">
               <Button
                 variant="default"
-                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 onClick={() => navigate('/courseDepartment')}
               >
-                <BookOpen className="w-5 h-5" /> <span>Course & Department</span>
+                <BookOpen className="w-5 h-5" /> <span>Course & Dept</span>
               </Button>
             </div>
 
             {/* View Students Button */}
-            <div className="relative flex-1">
+            <div className="relative">
               <Button
                 variant="outline"
-                className="border border-white/20 text-white hover:bg-white/10 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 onClick={() =>
                   setViewType((prev) => (prev === "student" ? null : "student"))
                 }
@@ -272,10 +272,10 @@ export default function CollegeDashboard() {
             </div>
 
             {/* View Faculty Button */}
-            <div className="relative flex-1">
+            <div className="relative">
               <Button
                 variant="outline"
-                className="border border-white/20 text-white hover:bg-white/10 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full"
+                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 flex items-center justify-center space-x-2 py-3 rounded-lg transition-all duration-200 w-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 onClick={() =>
                   setViewType((prev) => (prev === "faculty" ? null : "faculty"))
                 }
@@ -294,29 +294,29 @@ export default function CollegeDashboard() {
           )}
 
           {/* Stats Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="bg-white/10 backdrop-blur-lg border-none">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <Card className="bg-white rounded-xl overflow-hidden transform transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
               <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-white/80">
+                <h3 className="text-lg font-bold text-gray-700">
                   Total Students
                 </h3>
-                <p className="text-3xl font-bold text-white mt-2">1,200</p>
+                <p className="text-3xl font-bold text-blue-600 mt-2">1,200</p>
               </CardContent>
             </Card>
-            <Card className="bg-white/10 backdrop-blur-lg border-none">
+            <Card className="bg-white rounded-xl overflow-hidden transform transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
               <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-white/80">
+                <h3 className="text-lg font-bold text-gray-700">
                   Present Today
                 </h3>
-                <p className="text-3xl font-bold text-green-400 mt-2">950</p>
+                <p className="text-3xl font-bold text-green-500 mt-2">950</p>
               </CardContent>
             </Card>
-            <Card className="bg-white/10 backdrop-blur-lg border-none">
+            <Card className="bg-white rounded-xl overflow-hidden transform transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
               <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-white/80">
+                <h3 className="text-lg font-bold text-gray-700">
                   Absent Today
                 </h3>
-                <p className="text-3xl font-bold text-red-400 mt-2">250</p>
+                <p className="text-3xl font-bold text-red-500 mt-2">250</p>
               </CardContent>
             </Card>
           </div>

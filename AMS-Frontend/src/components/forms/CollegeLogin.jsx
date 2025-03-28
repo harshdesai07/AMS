@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, Mail, Lock } from "lucide-react";
+import { GraduationCap, Mail, Lock, ArrowRight } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function CollegeLogin() {
@@ -64,58 +64,88 @@ export default function CollegeLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d2b] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <Toaster position="top-center" />
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-center mb-8">
-          <GraduationCap className="w-10 h-10 text-blue-400" />
-          <h2 className="text-3xl font-bold text-white ml-3">College Login</h2>
+      <div className="w-full max-w-md">
+        {/* Card Container */}
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+          {/* Header Section */}
+          <div className="px-8 pt-8 pb-6">
+            <div className="text-center">
+              <GraduationCap className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+              <p className="text-gray-600">Please sign in to your college account</p>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {emailError && (
+            <div className="mx-8 mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-r">
+              <p className="text-red-700 text-sm">{emailError}</p>
+            </div>
+          )}
+
+          {/* Form Section */}
+          <div className="px-8 pb-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  College Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={collegeEmail}
+                    onChange={handleEmailChange}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                    placeholder="your@college.edu"
+                    required
+                  />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center group text-lg"
+              >
+                Sign In
+                <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" />
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <a href="#" className="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                Forgot your password?
+              </a>
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Mail className="w-5 h-5" />
-              <label className="text-sm font-medium">College Email</label>
-            </div>
-            <input
-              type="email"
-              value={collegeEmail}
-              onChange={handleEmailChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="your@college.edu"
-              required
-            />
-            {emailError && (
-              <p className="text-red-400 text-sm mt-1">{emailError}</p>
-            )}
-          </div>
-
-          {/* Password Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Lock className="w-5 h-5" />
-              <label className="text-sm font-medium">Password</label>
-            </div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] mt-8"
-          >
-            Login
-          </button>
-        </form>
+        {/* Footer Text */}
+        <p className="text-center mt-6 text-gray-600 text-sm">
+          Need help? Contact{" "}
+          <a href="#" className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
+            college support
+          </a>
+        </p>
       </div>
     </div>
   );

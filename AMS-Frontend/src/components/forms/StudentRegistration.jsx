@@ -3,7 +3,8 @@ import {
   GraduationCap,
   Mail,
   Phone,
-  User
+  User,
+  ArrowRight
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
@@ -38,7 +39,6 @@ export default function StudentRegistration() {
     const extractPhoneNumber = (phoneNumber) => {
       return phoneNumber?.replace(/^(\+\d{1,2})/, "") || "";
     };
-
 
     if (studentData) {
       setFormData({
@@ -165,245 +165,200 @@ export default function StudentRegistration() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d2b] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <Toaster position="top-center" />
-      <div className="w-full max-w-xl bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-center mb-8">
-          <GraduationCap className="w-10 h-10 text-blue-400" />
-          <h2 className="text-3xl font-bold text-white ml-3">
-            {studentData ? "Update Student" : "Student Registration"}
-          </h2>
+      <div className="w-full max-w-xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+          {/* Header Section */}
+          <div className="px-8 pt-8 pb-6">
+            <div className="text-center">
+              <User className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                {studentData ? "Update Student" : "Student Registration"}
+              </h2>
+              <p className="text-base text-gray-600">Enter student information</p>
+            </div>
+          </div>
+
+          <div className="px-8 pb-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.studentName}
+                    onChange={(e) => handleChange(e.target.value, "studentName")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                    placeholder="Enter student name"
+                  />
+                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.studentName && (
+                  <p className="text-red-600 text-sm mt-1">{errors.studentName}</p>
+                )}
+              </div>
+
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={formData.studentEmail}
+                    onChange={(e) => handleChange(e.target.value, "studentEmail")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                    placeholder="student@email.com"
+                  />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.studentEmail && (
+                  <p className="text-red-600 text-sm mt-1">{errors.studentEmail}</p>
+                )}
+              </div>
+
+              {/* Department Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Department
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.studentDepartment}
+                    onChange={(e) => handleChange(e.target.value, "studentDepartment")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                  >
+                    <option value="">Select Department</option>
+                    <option value="CSE">Computer Science (CSE)</option>
+                    <option value="ECE">Electronics (ECE)</option>
+                    <option value="ME">Mechanical (ME)</option>
+                    <option value="EE">Electrical (EE)</option>
+                    <option value="CE">Civil (CE)</option>
+                  </select>
+                  <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.studentDepartment && (
+                  <p className="text-red-600 text-sm mt-1">{errors.studentDepartment}</p>
+                )}
+              </div>
+
+              {/* Semester Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Semester
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.studentSem}
+                    onChange={(e) => handleChange(e.target.value, "studentSem")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                  >
+                    <option value="">Select Semester</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                    <option value="5">5th Semester</option>
+                    <option value="6">6th Semester</option>
+                    <option value="7">7th Semester</option>
+                    <option value="8">8th Semester</option>
+                  </select>
+                  <GraduationCap className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.studentSem && (
+                  <p className="text-red-600 text-sm mt-1">{errors.studentSem}</p>
+                )}
+              </div>
+
+              {/* Student Phone Number Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Student Phone Number
+                </label>
+                <div className="flex space-x-2">
+                  <div className="relative w-32">
+                    <select
+                      value={formData.countryCode}
+                      onChange={(e) => handleChange(e.target.value, "countryCode")}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    >
+                      <option value="+1">+1 (USA)</option>
+                      <option value="+91">+91 (India)</option>
+                      <option value="+44">+44 (UK)</option>
+                      <option value="+61">+61 (AU)</option>
+                      <option value="+81">+81 (JP)</option>
+                    </select>
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </div>
+                  <div className="relative flex-1">
+                    <input
+                      type="tel"
+                      value={formData.studentNumber}
+                      onChange={(e) => handleChange(e.target.value.replace(/\D/, ""), "studentNumber")}
+                      maxLength={10}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                      placeholder="Phone number"
+                    />
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </div>
+                </div>
+                {errors.studentNumber && (
+                  <p className="text-red-600 text-sm mt-1">{errors.studentNumber}</p>
+                )}
+              </div>
+
+              {/* Parent Phone Number Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Parent Phone Number
+                </label>
+                <div className="flex space-x-2">
+                  <div className="relative w-32">
+                    <select
+                      value={formData.parentCountryCode}
+                      onChange={(e) => handleChange(e.target.value, "parentCountryCode")}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    >
+                      <option value="+1">+1 (USA)</option>
+                      <option value="+91">+91 (India)</option>
+                      <option value="+44">+44 (UK)</option>
+                      <option value="+61">+61 (AU)</option>
+                      <option value="+81">+81 (JP)</option>
+                    </select>
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </div>
+                  <div className="relative flex-1">
+                    <input
+                      type="tel"
+                      value={formData.studentParentsNumber}
+                      onChange={(e) => handleChange(e.target.value.replace(/\D/, ""), "studentParentsNumber")}
+                      maxLength={10}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                      placeholder="Parent's phone number"
+                    />
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  </div>
+                </div>
+                {errors.studentParentsNumber && (
+                  <p className="text-red-600 text-sm mt-1">{errors.studentParentsNumber}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center group text-lg mt-8"
+              >
+                {studentData ? "Update Student" : "Complete Registration"}
+                <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" />
+              </button>
+            </form>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <User className="w-5 h-5" />
-              <label className="text-sm font-medium">Name</label>
-            </div>
-            <input
-              type="text"
-              value={formData.studentName}
-              onChange={(e) => handleChange(e.target.value, "studentName")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="Enter student name"
-            />
-            {errors.studentName && (
-              <p className="text-red-400 text-sm mt-1">{errors.studentName}</p>
-            )}
-          </div>
-
-          {/* Email Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Mail className="w-5 h-5" />
-              <label className="text-sm font-medium">Email</label>
-            </div>
-            <input
-              type="email"
-              value={formData.studentEmail}
-              onChange={(e) => handleChange(e.target.value, "studentEmail")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-              placeholder="student@email.com"
-            />
-            {errors.studentEmail && (
-              <p className="text-red-400 text-sm mt-1">{errors.studentEmail}</p>
-            )}
-          </div>
-
-          {/* Department Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Building2 className="w-5 h-5" />
-              <label className="text-sm font-medium">Department</label>
-            </div>
-            <select
-              value={formData.studentDepartment}
-              onChange={(e) =>
-                handleChange(e.target.value, "studentDepartment")
-              }
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-            >
-              <option value="" className="bg-[#1a1a3f]">
-                Select Department
-              </option>
-              <option value="CSE" className="bg-[#1a1a3f]">
-                Computer Science (CSE)
-              </option>
-              <option value="ECE" className="bg-[#1a1a3f]">
-                Electronics (ECE)
-              </option>
-              <option value="ME" className="bg-[#1a1a3f]">
-                Mechanical (ME)
-              </option>
-              <option value="EE" className="bg-[#1a1a3f]">
-                Electrical (EE)
-              </option>
-              <option value="CE" className="bg-[#1a1a3f]">
-                Civil (CE)
-              </option>
-            </select>
-            {errors.studentDepartment && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.studentDepartment}
-              </p>
-            )}
-          </div>
-
-          {/* Semester Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <GraduationCap className="w-5 h-5" />
-              <label className="text-sm font-medium">Semester</label>
-            </div>
-            <select
-              value={formData.studentSem}
-              onChange={(e) => handleChange(e.target.value, "studentSem")}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-            >
-              <option value="" className="bg-[#1a1a3f]">
-                Select Semester
-              </option>
-              <option value="1" className="bg-[#1a1a3f]">
-                1st Semester
-              </option>
-              <option value="2" className="bg-[#1a1a3f]">
-                2nd Semester
-              </option>
-              <option value="3" className="bg-[#1a1a3f]">
-                3rd Semester
-              </option>
-              <option value="4" className="bg-[#1a1a3f]">
-                4th Semester
-              </option>
-              <option value="5" className="bg-[#1a1a3f]">
-                5th Semester
-              </option>
-              <option value="6" className="bg-[#1a1a3f]">
-                6th Semester
-              </option>
-              <option value="7" className="bg-[#1a1a3f]">
-                7th Semester
-              </option>
-              <option value="8" className="bg-[#1a1a3f]">
-                8th Semester
-              </option>
-            </select>
-            {errors.studentSem && (
-              <p className="text-red-400 text-sm mt-1">{errors.studentSem}</p>
-            )}
-          </div>
-
-          {/* Student Phone Number Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Phone className="w-5 h-5" />
-              <label className="text-sm font-medium">
-                Student Phone Number
-              </label>
-            </div>
-            <div className="flex space-x-2">
-              <select
-                value={formData.countryCode}
-                onChange={(e) => handleChange(e.target.value, "countryCode")}
-                className="w-24 px-2 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-              >
-                <option value="+1" className="bg-[#1a1a3f]">
-                  +1 (USA)
-                </option>
-                <option value="+91" className="bg-[#1a1a3f]">
-                  +91 (India)
-                </option>
-                <option value="+44" className="bg-[#1a1a3f]">
-                  +44 (UK)
-                </option>
-                <option value="+61" className="bg-[#1a1a3f]">
-                  +61 (AU)
-                </option>
-                <option value="+81" className="bg-[#1a1a3f]">
-                  +81 (JP)
-                </option>
-              </select>
-              <input
-                type="tel"
-                value={formData.studentNumber}
-                onChange={(e) =>
-                  handleChange(
-                    e.target.value.replace(/\D/, ""),
-                    "studentNumber"
-                  )
-                }
-                maxLength={10}
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-                placeholder="Phone number"
-              />
-            </div>
-            {errors.studentNumber && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.studentNumber}
-              </p>
-            )}
-          </div>
-
-          {/* Parent Phone Number Field */}
-          <div>
-            <div className="flex items-center space-x-2 text-white mb-2">
-              <Phone className="w-5 h-5" />
-              <label className="text-sm font-medium">Parent Phone Number</label>
-            </div>
-            <div className="flex space-x-2">
-              <select
-                value={formData.parentCountryCode}
-                onChange={(e) =>
-                  handleChange(e.target.value, "parentCountryCode")
-                }
-                className="w-24 px-2 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50 appearance-none"
-              >
-                <option value="+1" className="bg-[#1a1a3f]">
-                  +1 (USA)
-                </option>
-                <option value="+91" className="bg-[#1a1a3f]">
-                  +91 (India)
-                </option>
-                <option value="+44" className="bg-[#1a1a3f]">
-                  +44 (UK)
-                </option>
-                <option value="+61" className="bg-[#1a1a3f]">
-                  +61 (AU)
-                </option>
-                <option value="+81" className="bg-[#1a1a3f]">
-                  +81 (JP)
-                </option>
-              </select>
-              <input
-                type="tel"
-                value={formData.studentParentsNumber}
-                onChange={(e) =>
-                  handleChange(
-                    e.target.value.replace(/\D/, ""),
-                    "studentParentsNumber"
-                  )
-                }
-                maxLength={10}
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-white/50"
-                placeholder="Parent's phone number"
-              />
-            </div>
-            {errors.studentParentsNumber && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.studentParentsNumber}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] mt-8"
-          >
-            {studentData ? "Update Student" : "Complete Registration"}
-          </button>
-        </form>
       </div>
     </div>
   );
