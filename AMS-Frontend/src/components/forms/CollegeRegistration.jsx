@@ -45,6 +45,18 @@ export default function CollegeRegistration() {
     setShowDropdown(false);
   };
 
+  const validatePassword = (password) => {
+    const hasNumber = /\d/.test(password);
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasSpecialChar = /[@._]/.test(password);
+
+    if (!hasNumber) return "Password must contain at least one number";
+    if (!hasLetter) return "Password must contain at least one letter";
+    if (!hasSpecialChar) return "Password must contain at least one special character (@, ., or _)";
+    if (password.length < 6) return "Password must be at least 6 characters";
+    return "";
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -62,10 +74,11 @@ export default function CollegeRegistration() {
       newErrors.type = "Please select a type of institution";
     }
 
+    const passwordError = validatePassword(formData.password);
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (passwordError) {
+      newErrors.password = passwordError;
     }
 
     if (!formData.confirmPassword) {

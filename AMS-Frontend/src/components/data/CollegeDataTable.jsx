@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import ActionButtons from "../ui/ActionButtons";
 
 const CollegeDataTable = ({ type, collegeId, onNoRecords }) => {
@@ -48,30 +49,53 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords }) => {
 
   const handleDelete = async (item) => {
     const itemId = item.studentId || item.facultyId;
-    if (!window.confirm(`Are you sure you want to delete this ${type}?`))
-      return;
+    
+    // Create a promise that resolves when user confirms or cancels
+    toast((t) => (
+      <div className="flex flex-col gap-2">
+        <p className="font-medium">Are you sure you want to delete this {type}?</p>
+        <div className="flex justify-end gap-2">
+          <button
+            className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const response = await fetch(`${base_url}/delete${type}/${itemId}`, {
+                  method: "DELETE",
+                });
+                const result = await response.json();
 
-    try {
-      const response = await fetch(`${base_url}/delete${type}/${itemId}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
+                if (!response.ok) {
+                  throw new Error("Deletion failed");
+                }
 
-      if (response.ok) {
-        alert(result.message || `${type} deleted successfully.`);
-        setData((prevData) =>
-          prevData.filter(
-            (dataItem) =>
-              dataItem.studentId !== itemId && dataItem.facultyId !== itemId
-          )
-        );
-      } else {
-        alert(result.error || `Failed to delete ${type}`);
-      }
-    } catch (error) {
-      console.error(`Error deleting ${type}:`, error);
-      alert("Something went wrong.");
-    }
+                toast.success(result.message || `${type} deleted successfully`);
+                setData((prevData) =>
+                  prevData.filter(
+                    (dataItem) =>
+                      dataItem.studentId !== itemId && dataItem.facultyId !== itemId
+                  )
+                );
+              } catch (error) {
+                console.error(`Error deleting ${type}:`, error);
+                toast.error("Something went wrong");
+              }
+            }}
+          >
+            Delete
+          </button>
+          <button
+            className="px-3 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+      position: "top-center",
+    });
   };
 
   const validType =
@@ -121,44 +145,46 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords }) => {
   };
 
   return (
-    <div className="mt-4 shadow overflow-hidden rounded-lg border border-gray-600 bg-gray-900">
-      <h2 className="text-lg font-semibold mb-2 px-4 py-2 bg-gray-700 text-white">
+    <div className="mt-4 shadow-lg rounded-lg border border-gray-200 bg-white">
+      <h2 className="text-lg font-semibold mb-2 px-4 py-3 bg-gray-100 text-gray-800 border-b border-gray-200">
         {validType === "student" ? "Student List" : "Faculty List"}
       </h2>
       <div className="overflow-x-auto">
-        <table className="table-auto min-w-max w-full border border-gray-600">
+        <table className="table-auto min-w-max w-full">
           <thead>
-            <tr className="bg-gray-700 border border-gray-600">
+            <tr className="bg-gray-100 border-b border-gray-200">
               {columns[validType]?.map((col, index) => (
                 <th
                   key={index}
-                  className="p-2 border border-gray-600 text-left text-white"
+                  className={"p-3 text-left text-gray-700 font-semibold"}
                 >
                   {col}
                 </th>
               ))}
-              <th className="p-2 border border-gray-600 text-white">Actions</th>
+              <th className="p-3 text-left text-gray-700 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data?.map((item) => (
+            {data?.map((item, rowIndex) => (
               <tr
                 key={item.studentId || item.facultyId}
-                className="hover:bg-gray-800 bg-gray-900 border border-gray-600"
+                className={`hover:bg-gray-50 border-b border-gray-100 transition-colors ${rowIndex % 2 === 0 ? "bg-gray-50" : ""}`}
               >
                 {keys[validType]?.map((key, index) => (
                   <td
                     key={index}
-                    className="p-2 border border-gray-600 text-white"
+                    className={"p-3 text-gray-700"}
                   >
                     {item[key]}
                   </td>
                 ))}
-                <td className="p-2 border border-gray-600 flex gap-2">
-                  <ActionButtons
-                    onUpdate={() => handleUpdate(item)}
-                    onDelete={() => handleDelete(item)}
-                  />
+                <td className="p-3">
+                  <div className="flex gap-2">
+                    <ActionButtons
+                      onUpdate={() => handleUpdate(item)}
+                      onDelete={() => handleDelete(item)}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

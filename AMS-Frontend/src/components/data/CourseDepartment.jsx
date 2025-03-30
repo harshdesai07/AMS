@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PlusCircle, X, ChevronDown } from 'lucide-react';
+import { Toaster, toast } from 'react-hot-toast';
 
 function CourseDepartment() {
   const [courseSelections, setCourseSelections] = useState([]);
@@ -9,8 +10,11 @@ function CourseDepartment() {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [newDepartmentInput, setNewDepartmentInput] = useState('');
+  const [departmentError, setDepartmentError] = useState('');
+  const [courseError, setCourseError] = useState('');
   const dropdownRefs = useRef([]);
   const BASE_URL = "http://localhost:8080";
+  const collegeId = sessionStorage.getItem('collegeId');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -37,26 +41,52 @@ function CourseDepartment() {
   };
 
   const fetchCourses = async () => {
-    setLoading(true);
+    setCourseError('');
     try {
       const response = await fetch(`${BASE_URL}/getCourses`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses');
+      }
       const data = await response.json();
       setCourses(data);
     } catch (error) {
       console.error('Error fetching courses:', error);
-    } finally {
-      setLoading(false);
+      setCourseError('Failed to load courses. Please try again later.');
+      toast.error('Failed to load courses');
     }
   };
 
   const fetchDepartments = async (courseId) => {
+    const loadingToast = toast.loading('Loading departments...');
     setLoading(true);
+    setDepartmentError('');
     try {
       const response = await fetch(`${BASE_URL}/departments/${courseId}`);
+      
+      if (response.status === 404) {
+        setDepartmentError('No departments found. Add manually.');
+        setDepartments([]);
+        toast.dismiss(loadingToast);
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error('Error fetching departments');
+      }
+
       const data = await response.json();
       setDepartments(data);
+      
+      if (data.length === 0) {
+        setDepartmentError('No departments found. Add manually.');
+        toast.dismiss(loadingToast);
+      } else {
+        toast.success('Departments loaded successfully', { id: loadingToast });
+      }
     } catch (error) {
       console.error('Error fetching departments:', error);
+      setDepartmentError('Error occurred while fetching departments. Please try again.');
+      toast.error('Failed to load departments', { id: loadingToast });
     } finally {
       setLoading(false);
     }
@@ -67,27 +97,28 @@ function CourseDepartment() {
       course: null, 
       departments: [], 
       manualDepartments: [],
-      isManualDepartmentInput: true,
-      isManualCourseInput: true
+      isManualDepartmentInput: true
     }]);
+    toast.success('New course selection added');
   };
 
   const handleRemoveCourseSelection = (index) => {
     setCourseSelections(courseSelections.filter((_, i) => i !== index));
+    toast.success('Course selection removed');
   };
 
-  const handleCourseChange = async (index, selectedCourse, customName) => {
+  const handleCourseChange = async (index, selectedCourse) => {
     const newSelections = [...courseSelections];
     newSelections[index] = {
       ...newSelections[index],
       course: selectedCourse,
       departments: [],
-      customCourseName: customName,
-      isManualDepartmentInput: customName ? true : newSelections[index].isManualDepartmentInput
+      manualDepartments: []
     };
     setCourseSelections(newSelections);
     setDropdownOpen(null);
     setSearchTerm('');
+    setDepartmentError('');
 
     if (selectedCourse) {
       await fetchDepartments(selectedCourse.id);
@@ -117,6 +148,9 @@ function CourseDepartment() {
       newSelections[courseIndex].manualDepartments = [...manualDepartments, newDepartmentInput.trim()];
       setCourseSelections(newSelections);
       setNewDepartmentInput('');
+      toast.success('Department added successfully');
+    } else {
+      toast.error('Department already exists');
     }
   };
 
@@ -126,20 +160,7 @@ function CourseDepartment() {
       d => d !== departmentName
     );
     setCourseSelections(newSelections);
-  };
-
-  const toggleDepartmentInput = (index) => {
-    const newSelections = [...courseSelections];
-    newSelections[index].isManualDepartmentInput = !newSelections[index].isManualDepartmentInput;
-    setCourseSelections(newSelections);
-  };
-
-  const toggleCourseInput = (index) => {
-    const newSelections = [...courseSelections];
-    newSelections[index].isManualCourseInput = !newSelections[index].isManualCourseInput;
-    newSelections[index].customCourseName = '';
-    newSelections[index].course = null;
-    setCourseSelections(newSelections);
+    toast.success('Department removed');
   };
 
   const filteredCourses = courses.filter(course => 
@@ -147,17 +168,62 @@ function CourseDepartment() {
   );
 
   const handleSubmit = async () => {
+    // Check if any course has no departments selected
+    const hasEmptyDepartments = courseSelections.some(selection => 
+      selection.departments.length === 0 && selection.manualDepartments.length === 0
+    );
+
+    if (hasEmptyDepartments) {
+      const confirmPromise = new Promise((resolve) => {
+        toast((t) => (
+          <div>
+            <p>Some courses have no departments selected. Continue?</p>
+            <div className="mt-2 flex justify-end gap-2">
+              <button
+                className="px-2 py-1 text-sm bg-red-500 text-white rounded"
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  resolve(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-2 py-1 text-sm bg-green-500 text-white rounded"
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  resolve(true);
+                }}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        ), { duration: Infinity });
+      });
+
+      const shouldContinue = await confirmPromise;
+      if (!shouldContinue) return;
+    }
+
+    // Check if all selections have a course
+    const hasAllCourses = courseSelections.every(selection => selection.course);
+    if (!hasAllCourses) {
+      toast.error('Please select a course for all entries.');
+      return;
+    }
+
     const formattedData = courseSelections.map(selection => ({
-      courseName: selection.customCourseName || selection.course?.name,
-      courseId: selection.course?.id,
-      departments: selection.isManualDepartmentInput ? 
-        selection.manualDepartments.map(dept => ({ name: dept })) :
-        selection.departments,
-      isCustomCourse: !!selection.customCourseName
+      collegeId: collegeId,
+      courseName: selection.course.name,
+      departments: selection.departments.length > 0 
+        ? selection.departments.map(dept => dept.name) 
+        : selection.manualDepartments 
     }));
 
+    const saveToast = toast.loading('Saving courses and departments...');
     try {
-      const response = await fetch('/api/save-courses', {
+      const response = await fetch(`${BASE_URL}/addCourseDept`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,17 +232,18 @@ function CourseDepartment() {
       });
       
       if (response.ok) {
-        alert('Courses and departments saved successfully!');
+        toast.success('Courses and departments saved successfully!', { id: saveToast });
         setCourseSelections([]);
       }
     } catch (error) {
       console.error('Error saving data:', error);
-      alert('Error saving data. Please try again.');
+      toast.error('Error saving data. Please try again.', { id: saveToast });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <Toaster position="top-right" />
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Course and Department Management</h1>
@@ -200,129 +267,112 @@ function CourseDepartment() {
                       <label className="block text-sm font-medium text-gray-700">
                         Course
                       </label>
-                      <button
-                        onClick={() => toggleCourseInput(index)}
-                        className="text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        {selection.isManualCourseInput ? 'Choose from list' : 'Add manually'}
-                      </button>
                     </div>
                     
-                    {selection.isManualCourseInput ? (
-                      <input
-                        type="text"
-                        className="block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-gray-400"
-                        placeholder="Enter course name"
-                        onChange={(e) => handleCourseChange(index, null, e.target.value)}
-                        value={selection.customCourseName || ''}
-                      />
-                    ) : (
-                      <div 
-                        className="relative" 
-                        ref={el => dropdownRefs.current[index] = el}
+                    <div 
+                      className="relative" 
+                      ref={el => dropdownRefs.current[index] = el}
+                    >
+                      <button
+                        onClick={() => handleDropdownClick(index)}
+                        className="flex justify-between items-center w-full px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:border-blue-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       >
-                        <button
-                          onClick={() => handleDropdownClick(index)}
-                          className="flex justify-between items-center w-full px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:border-blue-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        >
-                          <span>{selection.course?.name || 'Choose a course'}</span>
-                          <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${dropdownOpen === index ? 'transform rotate-180' : ''}`} />
-                        </button>
-                        
-                        {dropdownOpen === index && (
-                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
-                            <div className="p-2">
-                              <input
-                                type="text"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                placeholder="Search courses..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                              />
-                            </div>
-                            {loading ? (
-                              <div className="p-2 text-gray-500 text-center">Loading courses...</div>
-                            ) : (
-                              <div className="max-h-60 overflow-auto">
-                                {filteredCourses.map(course => (
-                                  <button
-                                    key={course.id}
-                                    className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                                    onClick={() => handleCourseChange(index, course)}
-                                  >
-                                    {course.name}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
+                        <span>{selection.course?.name || 'Choose a course'}</span>
+                        <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${dropdownOpen === index ? 'transform rotate-180' : ''}`} />
+                      </button>
+                      
+                      {dropdownOpen === index && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                          <div className="p-2">
+                            <input
+                              type="text"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              placeholder="Search courses..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                           </div>
-                        )}
-                      </div>
-                    )}
+                          {loading ? (
+                            <div className="p-2 text-gray-500 text-center">Loading courses...</div>
+                          ) : courseError ? (
+                            <div className="p-2 text-red-600 text-center">{courseError}</div>
+                          ) : (
+                            <div className="max-h-60 overflow-auto">
+                              {filteredCourses.map(course => (
+                                <button
+                                  key={course.id}
+                                  className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                                  onClick={() => handleCourseChange(index, course)}
+                                >
+                                  {course.name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {(selection.course || selection.customCourseName) && (
+                {selection.course && (
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-sm font-medium text-gray-700">
                         Departments
                       </label>
-                      {!selection.customCourseName && (
-                        <button
-                          onClick={() => toggleDepartmentInput(index)}
-                          className="text-sm text-blue-600 hover:text-blue-700"
-                        >
-                          {selection.isManualDepartmentInput ? 'Choose from list' : 'Add manually'}
-                        </button>
-                      )}
                     </div>
 
-                    {(selection.isManualDepartmentInput || selection.customCourseName) ? (
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            className="flex-1 rounded-md border-gray-300"
-                            placeholder="Enter department name"
-                            value={newDepartmentInput}
-                            onChange={(e) => setNewDepartmentInput(e.target.value)}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                handleManualDepartmentAdd(index);
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => handleManualDepartmentAdd(index)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                          >
-                            Add
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {selection.manualDepartments?.map((dept, deptIndex) => (
-                            <div
-                              key={deptIndex}
-                              className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded"
-                            >
-                              <span>{dept}</span>
+                    {departmentError ? (
+                      <div>
+                        <div className="text-red-600 mb-4">{departmentError}</div>
+                        {departmentError.includes('Add manually') && (
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                className="flex-1 rounded-md border-gray-300"
+                                placeholder="Enter department name"
+                                value={newDepartmentInput}
+                                onChange={(e) => setNewDepartmentInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleManualDepartmentAdd(index);
+                                  }
+                                }}
+                              />
                               <button
-                                onClick={() => handleRemoveManualDepartment(index, dept)}
-                                className="text-blue-600 hover:text-blue-800"
+                                onClick={() => handleManualDepartmentAdd(index)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                               >
-                                <X size={14} />
+                                Add
                               </button>
                             </div>
-                          ))}
-                        </div>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {selection.manualDepartments?.map((dept, deptIndex) => (
+                                <div
+                                  key={deptIndex}
+                                  className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                                >
+                                  <span>{dept}</span>
+                                  <button
+                                    onClick={() => handleRemoveManualDepartment(index, dept)}
+                                    className="text-blue-600 hover:text-blue-800"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-2">
                         {departments.map(department => (
                           <label
                             key={department.id}
-                            className="flex items-center space-x-2 p-2 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                            className="flex items-center space-x-2 p-2 rounded border border-gray-200 hover:bg-gray-50 transition-colors"
                           >
                             <input
                               type="checkbox"

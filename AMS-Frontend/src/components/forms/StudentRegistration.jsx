@@ -4,7 +4,8 @@ import {
   Mail,
   Phone,
   User,
-  ArrowRight
+  ArrowRight,
+  BookOpen
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
@@ -26,9 +27,18 @@ export default function StudentRegistration() {
     studentSem: "",
     countryCode: "+1",
     parentCountryCode: "+1",
+    courseId: "",
   });
 
+  const [courses, setCourses] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [semesters, setSemesters] = useState([]);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
   useEffect(() => {
     const extractCountryCode = (phoneNumber) => {
@@ -52,18 +62,71 @@ export default function StudentRegistration() {
         studentSem: studentData.studentSem || "",
         countryCode: extractCountryCode(studentData.studentNumber),
         parentCountryCode: extractCountryCode(studentData.studentParentsNumber),
+        courseId: studentData.courseId || "",
       });
+
+      if (studentData.courseId) {
+        fetchDepartmentsAndSemesters(studentData.courseId);
+      }
     }
   }, [studentData]);
+
+  const fetchCourses = async () => {
+    setLoading(true);
+    try {
+      const collegeId = sessionStorage.getItem("collegeId");
+      const response = await fetch(`http://localhost:8080/courses/${collegeId}`);
+      if (!response.ok) throw new Error("Failed to fetch courses");
+      const data = await response.json();
+      setCourses(data);
+    } catch (error) {
+      toast.error("Failed to fetch courses");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDepartmentsAndSemesters = async (courseId) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:8080/course-details/${courseId}`);
+      if (!response.ok) throw new Error("Failed to fetch course details");
+      const data = await response.json();
+      setDepartments(data.departments || []);
+      setSemesters(data.semesters || []);
+
+      // Reset department and semester selections
+      setFormData(prev => ({
+        ...prev,
+        studentDepartment: "",
+        studentSem: "",
+      }));
+    } catch (error) {
+      toast.error("Failed to fetch course details");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (value, name) => {
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: "" });
+
+    if (name === "courseId" && value) {
+      fetchDepartmentsAndSemesters(value);
+    }
   };
 
   const validateForm = () => {
     let isValid = true;
     let newErrors = {};
+
+    if (!formData.courseId) {
+      newErrors.courseId = "Course selection is required";
+      isValid = false;
+    }
 
     if (!formData.studentName.trim()) {
       newErrors.studentName = "Name is required";
@@ -91,6 +154,12 @@ export default function StudentRegistration() {
       isValid = false;
     } else if (!/^\d{10}$/.test(formData.studentParentsNumber)) {
       newErrors.studentParentsNumber = "Phone number must be exactly 10 digits";
+      isValid = false;
+    }
+
+    if (formData.studentNumber === formData.studentParentsNumber && 
+        formData.countryCode === formData.parentCountryCode) {
+      newErrors.studentParentsNumber = "Parent's phone number must be different from student's number";
       isValid = false;
     }
 
@@ -164,6 +233,14 @@ export default function StudentRegistration() {
     }
   };
 
+  // Filter available semesters based on current semester
+  const getAvailableSemesters = () => {
+    if (!studentData || !studentData.studentSem) {
+      return semesters;
+    }
+    return semesters.filter(sem => parseInt(sem) >= parseInt(studentData.studentSem));
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <Toaster position="top-center" />
@@ -182,6 +259,32 @@ export default function StudentRegistration() {
 
           <div className="px-8 pb-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Course Selection */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Course
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.courseId}
+                    onChange={(e) => handleChange(e.target.value, "courseId")}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    disabled={loading}
+                  >
+                    <option value="">Select Course</option>
+                    {courses.map((course) => (
+                      <option key={course.id} value={course.id}>
+                        {course.name}
+                      </option>
+                    ))}
+                  </select>
+                  <BookOpen className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                </div>
+                {errors.courseId && (
+                  <p className="text-red-600 text-sm mt-1">{errors.courseId}</p>
+                )}
+              </div>
+
               {/* Name Field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -232,13 +335,14 @@ export default function StudentRegistration() {
                     value={formData.studentDepartment}
                     onChange={(e) => handleChange(e.target.value, "studentDepartment")}
                     className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    disabled={!formData.courseId || loading}
                   >
                     <option value="">Select Department</option>
-                    <option value="CSE">Computer Science (CSE)</option>
-                    <option value="ECE">Electronics (ECE)</option>
-                    <option value="ME">Mechanical (ME)</option>
-                    <option value="EE">Electrical (EE)</option>
-                    <option value="CE">Civil (CE)</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
                   </select>
                   <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
@@ -257,16 +361,14 @@ export default function StudentRegistration() {
                     value={formData.studentSem}
                     onChange={(e) => handleChange(e.target.value, "studentSem")}
                     className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
+                    disabled={!formData.courseId || loading}
                   >
                     <option value="">Select Semester</option>
-                    <option value="1">1st Semester</option>
-                    <option value="2">2nd Semester</option>
-                    <option value="3">3rd Semester</option>
-                    <option value="4">4th Semester</option>
-                    <option value="5">5th Semester</option>
-                    <option value="6">6th Semester</option>
-                    <option value="7">7th Semester</option>
-                    <option value="8">8th Semester</option>
+                    {getAvailableSemesters().map((sem) => (
+                      <option key={sem} value={sem}>
+                        {sem}th Semester
+                      </option>
+                    ))}
                   </select>
                   <GraduationCap className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
@@ -352,6 +454,7 @@ export default function StudentRegistration() {
               <button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center group text-lg mt-8"
+                disabled={loading}
               >
                 {studentData ? "Update Student" : "Complete Registration"}
                 <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" />
