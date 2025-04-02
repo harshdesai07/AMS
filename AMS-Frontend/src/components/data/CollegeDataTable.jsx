@@ -106,6 +106,7 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords }) => {
     student: [
       "Id",
       "Name",
+      "Course",
       "Department",
       "Semester",
       "Email",
