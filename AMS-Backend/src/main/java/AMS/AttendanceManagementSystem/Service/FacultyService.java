@@ -42,13 +42,13 @@ public class FacultyService implements UserDetailsService {
 	private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	FacultyRepo fr;
+	private FacultyRepo fr;
 
 	@Autowired
-	FacultyAssignmentRepo far;
+	private FacultyAssignmentRepo far;
 
 	@Autowired
-	CollegeRepo cr;
+	private CollegeRepo cr;
 
 	@Autowired
 	private CourseRepo cor;
@@ -126,6 +126,7 @@ public class FacultyService implements UserDetailsService {
 				college.getCollegeName(),
 				college.getEmail(),
 				"🔐 Your Login Credentials");
+	
 
 	}
 
@@ -145,9 +146,13 @@ public class FacultyService implements UserDetailsService {
 
 	}
 
-//	this function is uses to find or get all faculty data from database
-	public List<Faculty> retriveFaculty(Integer id) {
-		return fr.findByCollegeId(id);
+//	this function is uses to find or get all faculty data from database based on source
+	public List<Faculty> retriveFaculty(Integer id, String source, String courseName, String departmentName) {
+		
+		if(source.equals("COLLEGE")) {
+			return fr.findAllHodsByCollegeId(id);
+		}
+		return fr.findAllFacultyExceptHodsByCollegeCourseAndDepartment(id, courseName, departmentName);
 
 	}
 
@@ -156,26 +161,30 @@ public class FacultyService implements UserDetailsService {
 	public void updateFaculty(Long facultyId, FacultyDto fdt) {
 		// 1. find the faculty from Faculty table
 		Faculty faculty = fr.findById(facultyId)
-				.orElseThrow(() -> new RuntimeException("Student not found with student id: " + facultyId));
+				.orElseThrow(() -> new RuntimeException("Facuty not found with faculty id: " + facultyId));
 
 		// 2. find course by courseName
 		Course course = cor.findByName(fdt.getCourse())
 				.orElseThrow(() -> new RuntimeException("Course not found with name: " + fdt.getCourse()));
 
-		// 3. find college course with course
-		CollegeCourse collegeCourse = ccr.findByCourse(course)
-				.orElseThrow(() -> new RuntimeException("collegeCourse not found with name: " + fdt.getCourse()));
-
-		// 4. find department by department name
+		//3. find college from CollegeCourseDepartment
+		College college = faculty.getCollegeCourseDepartment().getCollegeCourse().getCollege();
+		 
+		// 4. Find CollegeCourse (mapping between college & course)
+		CollegeCourse collegeCourse = ccr.findByCollegeAndCourse(college, course)
+						.orElseThrow(() -> new RuntimeException(
+								"CollegeCourse not found for college: " + college.getCollegeId() + " and course: " + fdt.getCourse()));
+		
+		// 5. find department by department name
 		Department newDept = dr.findByName(fdt.getDepartment())
 				.orElseThrow(() -> new RuntimeException("Department not found with name: " + fdt.getDepartment()));
-
-		// 5. find collegeCourseDepartment with collegeCourse and newDept
+		
+		// 6. find collegeCourseDepartment with collegeCourse and newDept
 		CollegeCourseDepartment collegeCourseDepartment = ccdr.findByCollegeCourseAndDepartment(collegeCourse, newDept)
 				.orElseThrow(
 						() -> new RuntimeException("CollegeCourseDepartment not found for course: " + collegeCourse));
-
-		// 6. save all details
+		
+		// 7. save all details
 		faculty.setCollegeCourseDepartment(collegeCourseDepartment);
 		faculty.setFacultyDesignation(fdt.getFacultyDesignation());
 		faculty.setFacultyEmail(fdt.getFacultyEmail());

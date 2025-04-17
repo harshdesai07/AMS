@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-
+import CloseButton from '../ui/CloseButton';
 
 export default function StudentRegistration() {
   const navigate = useNavigate();
@@ -21,31 +21,33 @@ export default function StudentRegistration() {
   const studentId = paramId || studentData?.studentId;
   const BASE_URL = "http://localhost:8080";
   const collegeId = localStorage.getItem("collegeId");
-  const token = localStorage.getItem("collegeToken");
+  const token = localStorage.getItem("hodToken");
+  const storedCourse = localStorage.getItem("hodCourse");
+  const storedDepartment = localStorage.getItem("hodDepartment");
 
   const [formData, setFormData] = useState({
     studentName: "",
     studentEmail: "",
     studentNumber: "",
     studentParentsNumber: "",
-    studentDepartment: "",
+    studentDepartment: storedDepartment || "",
     studentSem: "",
     countryCode: "+1",
     parentCountryCode: "+1",
-    courseId: "",
-    courseName: "",
+    courseName: storedCourse || "",
   });
 
-  const [courses, setCourses] = useState([]);
-  const [departments, setDepartments] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [showDepartment, setShowDepartment] = useState(false);
-  const [selectedCourseId, setSelectedCourseId] = useState("");
 
   useEffect(() => {
-    fetchCourses();
+    if (storedCourse) {
+      fetchSemesters(storedCourse).catch(error => {
+        console.error("Error fetching semesters:", error);
+        toast.error("Failed to fetch semesters");
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -53,41 +55,36 @@ export default function StudentRegistration() {
       if (!phoneNumber) return "+1";
       return phoneNumber.slice(0, -10);
     };
-  
+
+    const handleClose = () => {
+      navigate(-1);  // this takes you back to the previous page
+    };
+
     const extractPhoneNumber = (phoneNumber) => {
       if (!phoneNumber) return "";
       return phoneNumber.slice(-10);
     };
-  
+
     if (studentData) {
       const newFormData = {
         studentName: studentData.studentName || "",
         studentEmail: studentData.studentEmail || "",
         studentNumber: extractPhoneNumber(studentData.studentNumber),
         studentParentsNumber: extractPhoneNumber(studentData.studentParentsNumber),
-        studentDepartment: studentData.studentDepartment || "",
+        studentDepartment: storedDepartment || "",
         studentSem: studentData.studentSem || "",
         countryCode: extractCountryCode(studentData.studentNumber),
         parentCountryCode: extractCountryCode(studentData.studentParentsNumber),
-        courseId: studentData.courseId || "",
-        courseName: studentData.courseName || "",
+        courseName: storedCourse || "",
       };
-  
+
       setFormData(newFormData);
-  
-      if (studentData.courseName) {
-        Promise.all([
-          fetchDepartments(studentData.courseName),
-          fetchSemesters(studentData.courseName),
-        ]).then(([deptData, semData]) => {
-          setDepartments(deptData);
+
+      if (storedCourse) {
+        fetchSemesters(storedCourse).then((semData) => {
           setSemesters(semData);
-  
           setFormData((prev) => ({
             ...prev,
-            studentDepartment:
-              studentData.studentDepartment ||
-              (deptData.length > 0 ? deptData[0].name : ""),
             studentSem:
               studentData.studentSem ||
               (semData.length > 0 ? semData[0].semesterNumber : ""),
@@ -96,58 +93,6 @@ export default function StudentRegistration() {
       }
     }
   }, [studentData]);
-  
-
-  const fetchCourses = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `${BASE_URL}/courses/${collegeId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setCourses(response.data);
-    } catch (error) {
-      toast.error("Failed to fetch courses");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDepartments = async (courseName) => {
-    if (!courseName) return [];
-    
-    setLoading(true);
-    try {
-      const encodedCourseName = encodeURIComponent(courseName);
-      const response = await axios.get(
-        `${BASE_URL}/getDepartments/${collegeId}/${encodedCourseName}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-
-      const departmentsList = Array.isArray(response.data) ? response.data : data.departments || [];
-      setDepartments(departmentsList);
-      setShowDepartment(departmentsList.length > 0);
-      return departmentsList;
-    } catch (error) {
-      console.error("Department fetch error:", error);
-      toast.error("Failed to fetch departments");
-      setDepartments([]);
-      setShowDepartment(false);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchSemesters = async (courseName) => {
     if (!courseName) return [];
@@ -160,7 +105,7 @@ export default function StudentRegistration() {
       const data = await response.json();
 
       let semestersList = Array.isArray(data) ? data : [];
-      
+
       if (studentData && studentData.semester) {
         semestersList = semestersList.filter(sem => {
           return getSemesterNumber(sem.semesterNumber) >= getSemesterNumber(studentData.semester);
@@ -184,51 +129,16 @@ export default function StudentRegistration() {
     return match ? parseInt(match[0], 10) : 0;
   };
 
-  const handleChange = async (value, name) => {
-    if (name === "courseId" && !studentData) {
-      const selectedCourse = courses.find(course => course.id == value);
-      if (!selectedCourse) {
-        console.error("Selected course not found");
-        return;
-      }
-
-      const courseName = selectedCourse.name;
-
-      setFormData(prev => ({
-        ...prev,
-        courseId: value,
-        courseName: courseName,
-        studentDepartment: "",
-        studentSem: ""
-      }));
-
-      setSelectedCourseId(value);
-
-      try {
-        await Promise.all([
-          fetchDepartments(courseName),
-          fetchSemesters(courseName)
-        ]);
-      } catch (error) {
-        console.error("Error fetching course data:", error);
-        toast.error("Failed to fetch course details");
-      }
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+  const handleChange = (value, name) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const validateForm = () => {
     let isValid = true;
     let newErrors = {};
-
-    if (!formData.courseId && !studentData) {
-      newErrors.courseId = "Course selection is required";
-      isValid = false;
-    }
 
     if (!formData.studentName.trim()) {
       newErrors.studentName = "Name is required";
@@ -265,11 +175,6 @@ export default function StudentRegistration() {
       isValid = false;
     }
 
-    if (showDepartment && !formData.studentDepartment) {
-      newErrors.studentDepartment = "Department is required";
-      isValid = false;
-    }
-
     if (!formData.studentSem) {
       newErrors.studentSem = "Semester is required";
       isValid = false;
@@ -286,7 +191,7 @@ export default function StudentRegistration() {
     const fullPhoneNumber = `${formData.countryCode}${formData.studentNumber}`;
     const parentFullPhoneNumber = `${formData.parentCountryCode}${formData.studentParentsNumber}`;
     const loadingToast = toast.loading(studentData ? "Updating..." : "Registering...");
-    
+
     try {
       let response;
       const dtoData = {
@@ -294,51 +199,49 @@ export default function StudentRegistration() {
         studentName: formData.studentName,
         studentNumber: fullPhoneNumber,
         studentParentsNumber: parentFullPhoneNumber,
-        deptName: formData.studentDepartment,
-        courseName: formData.courseName,
+        deptName: storedDepartment,
+        courseName: storedCourse,
         semester: formData.studentSem.toString()
       };
-    
+
       if (!collegeId) {
         throw new Error("College ID is missing or invalid.");
       }
-    
+
       const headers = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, 
+        Authorization: `Bearer ${token}`,
       };
-    
+
       if (studentData) {
-        // PUT for update
         response = await axios.put(
           `${BASE_URL}/updatestudent/${studentId}`,
           dtoData,
           { headers }
         );
       } else {
-        // POST for register
         response = await axios.post(
           `${BASE_URL}/studentregister/${collegeId}`,
           dtoData,
           { headers }
         );
       }
-    
+
       const successMessage = studentData
         ? "Student updated successfully!"
         : "Student registered successfully!";
-    
+
       toast.success(successMessage);
       toast.dismiss(loadingToast);
-      setTimeout(() => navigate("/collegeDashboard"), 1500);
-    
+      setTimeout(() => navigate("/hodDashboard"), 1500);
+
     } catch (error) {
       toast.dismiss(loadingToast);
       console.error("Error:", error);
       const errorMsg =
         error.response?.data?.message || error.response?.data || error.message || "An unexpected error occurred";
       toast.error(errorMsg);
-    }    
+    }
   };
 
   return (
@@ -346,6 +249,12 @@ export default function StudentRegistration() {
       <Toaster position="top-center" />
       <div className="w-full max-w-xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+
+          {/* Close Button */}
+          <div className="absolute top-4 right-4 z-10">
+            <CloseButton onClick={handleClose} />
+          </div>
+
           <div className="px-8 pt-8 pb-6">
             <div className="text-center">
               <User className="w-16 h-16 mx-auto text-blue-600 mb-4" />
@@ -358,6 +267,7 @@ export default function StudentRegistration() {
 
           <div className="px-8 pb-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Name
@@ -377,6 +287,7 @@ export default function StudentRegistration() {
                 )}
               </div>
 
+              {/* Email field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Email
@@ -396,71 +307,39 @@ export default function StudentRegistration() {
                 )}
               </div>
 
+              {/* Course field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Course
                 </label>
                 <div className="relative">
-                  {studentData ? (
-                    <input
-                      type="text"
-                      value={formData.courseName}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed"
-                      disabled
-                    />
-                  ) : (
-                    <select
-                      value={formData.courseId}
-                      onChange={(e) => handleChange(e.target.value, "courseId")}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
-                      disabled={loading}
-                    >
-                      <option value="">Select Course</option>
-                      {courses.length > 0 ? (
-                        courses.map((course) => (
-                          <option key={course.id} value={course.id}>
-                            {course.name}
-                          </option>
-                        ))
-                      ) : (
-                        <option disabled>Loading courses...</option>
-                      )}
-                    </select>
-                  )}
+                  <input
+                    type="text"
+                    value={storedCourse}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed"
+                    disabled
+                  />
                   <BookOpen className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
-                {errors.courseId && (
-                  <p className="text-red-600 text-sm mt-1">{errors.courseId}</p>
-                )}
               </div>
 
-              {showDepartment && (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Department
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={formData.studentDepartment}
-                      onChange={(e) => handleChange(e.target.value, "studentDepartment")}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none appearance-none bg-white"
-                      disabled={loading}
-                    >
-                      <option value="">Select Department</option>
-                      {departments.map((dept) => (
-                        <option key={dept.id} value={dept.name}>
-                          {dept.name}
-                        </option>
-                      ))}
-                    </select>
-                    <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  </div>
-                  {errors.studentDepartment && (
-                    <p className="text-red-600 text-sm mt-1">{errors.studentDepartment}</p>
-                  )}
+              {/* Department field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Department
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={storedDepartment}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed"
+                    disabled
+                  />
+                  <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
-              )}
+              </div>
 
+              {/* Semester field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Semester
@@ -490,6 +369,7 @@ export default function StudentRegistration() {
                 )}
               </div>
 
+              {/* Student Phone Number field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Student Phone Number
@@ -526,6 +406,7 @@ export default function StudentRegistration() {
                 )}
               </div>
 
+              {/* Parent Phone Number field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Parent Phone Number

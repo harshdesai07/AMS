@@ -1,7 +1,5 @@
 package AMS.AttendanceManagementSystem.Controller;
 
-
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,13 +14,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import AMS.AttendanceManagementSystem.Dto.FacultyDto;
-import AMS.AttendanceManagementSystem.Dto.FacultyLoginDto;
 import AMS.AttendanceManagementSystem.Entity.Faculty;
 
 import AMS.AttendanceManagementSystem.Service.FacultyService;
@@ -46,36 +42,20 @@ public class FacultyController {
 		}
 	    
 	
-////	 faculty login api
-//	 @PostMapping("/facultylogin")
-//	 public ResponseEntity<Map<String,String>> facultyLogin(@RequestBody FacultyLoginDto fld){
-//		 
-//		 Map<String,String> response=new HashMap<>();
-//		 String s = frs.facultyAuthentication(fld.getFacultyId(), fld.getFacultyPassword());
-//		 
-//		 if(s!=null) {
-//			   response.put("message", "Login Successful");
-//			   response.put("designation", s);			 
-//			   return ResponseEntity.ok(response);
-//		 }
-//		 response.put("message","Invalid id or password");
-//		 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-//		 
-//	 }
-	
 //	 api to get faculty whole data
-	 @GetMapping("/getfaculty/{id}")
-	 public List<Faculty> fetchFaculty(@PathVariable Integer id){
-		 return frs.retriveFaculty(id);
+	 @GetMapping("/getfaculty/{id}/{source}")
+	 public List<Faculty> fetchFaculty(@PathVariable Integer id, @PathVariable String source, @RequestParam String courseName, 
+		        @RequestParam String departmentName){
+		 return frs.retriveFaculty(id,source,courseName,departmentName);
 	 } 
 	 
 	// Update faculty Record from Fronted
-	 @PutMapping("/updatefaculty/{id}")
-	 public ResponseEntity<Map<String, String>> editFaculty(@PathVariable Long id, @RequestBody FacultyDto fdt) {
+	 @PutMapping("/updatefaculty/{facultyId}")
+	 public ResponseEntity<Map<String, String>> editFaculty(@PathVariable Long facultyId, @RequestBody FacultyDto fdt) {
 		 Map<String, String> response = new HashMap<>();
 			
 			try{
-				frs.updateFaculty(id, fdt);
+				frs.updateFaculty(facultyId, fdt);
 				response.put("message", "Update Faculty successful");
 				return ResponseEntity.ok(response);
 			} catch (Exception e) {
@@ -83,7 +63,8 @@ public class FacultyController {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
 			}
 	 }
-//	 
+	 
+	
 //	 api to delete faculty
 	 @DeleteMapping("/deletefaculty/{id}")
 	 public ResponseEntity<Map<String,String>> deleteSt(@PathVariable Long id){

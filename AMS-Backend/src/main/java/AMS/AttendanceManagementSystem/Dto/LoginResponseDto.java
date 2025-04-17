@@ -7,8 +7,21 @@ public class LoginResponseDto {
     private String collegeName;
     private Integer collegeId;
     private String designation;
+    private String course;
+    private String department;
     
-    
+	public String getCourse() {
+		return course;
+	}
+	public void setCourse(String course) {
+		this.course = course;
+	}
+	public String getDepartment() {
+		return department;
+	}
+	public void setDepartment(String department) {
+		this.department = department;
+	}
 	public Integer getCollegeId() {
 		return collegeId;
 	}

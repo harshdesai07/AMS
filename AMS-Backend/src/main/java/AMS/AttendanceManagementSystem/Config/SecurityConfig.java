@@ -48,20 +48,18 @@ public class SecurityConfig {
                 .requestMatchers("/courses/{collegeId}").hasAuthority("COLLEGE")
                 .requestMatchers("/addCourseDept").hasAuthority("COLLEGE")
                 .requestMatchers("/getDepartments/{collegeId}/{courseName}").hasAuthority("COLLEGE")
-                .requestMatchers("/facultyregister/{collegeId}").hasAuthority("COLLEGE")
-                .requestMatchers("/getfaculty/{id}").hasAuthority("COLLEGE")
-                .requestMatchers("/updatefaculty/{id}").hasAuthority("COLLEGE")
-                .requestMatchers("/deletefaculty/{id}").hasAuthority("COLLEGE")
-                .requestMatchers("/uploadFacultyExcel/{collegeId}").hasAuthority("COLLEGE")
-                .requestMatchers("/studentregister/{collegeId}").hasAuthority("COLLEGE")
-                .requestMatchers("/updatestudent/{studentId}").hasAuthority("COLLEGE")
-                .requestMatchers("/deletestudent/{studentId}").hasAuthority("COLLEGE")
-                .requestMatchers("/getstudent/{collegeId}").hasAuthority("COLLEGE")
-                .requestMatchers("/uploadStudentExcel/{collegeId}").hasAuthority("COLLEGE")
                 
                 // HOD end points
                 .requestMatchers("/addSubjects").hasAuthority("HOD")
+                .requestMatchers("/addSubjectsExcel").hasAuthority("HOD")
+                .requestMatchers("/getSubjects").hasAnyAuthority("HOD")
                 .requestMatchers("/SubjectAssign").hasAuthority("HOD")
+                .requestMatchers("/getstudent/{collegeId}").hasAuthority("HOD")
+                .requestMatchers("/deletestudent/{studentId}").hasAuthority("HOD") 
+                .requestMatchers("/updatestudent/{studentId}").hasAuthority("HOD")
+                .requestMatchers("/uploadStudentExcel/{collegeId}").hasAuthority("HOD")
+                .requestMatchers("/studentregister/{collegeId}").hasAuthority("HOD")
+                .requestMatchers("/getSubjectsSemesterwise/{collegeId}").hasAuthority("HOD")
                 
                 // Faculty end points
                 .requestMatchers("/faculty/markAttendance/**").hasAuthority("FACULTY")
@@ -69,6 +67,13 @@ public class SecurityConfig {
                 
                 // Student end points
                 .requestMatchers("/student/attendance/**").hasAuthority("STUDENT")
+                
+                // College and HOD end points
+                .requestMatchers("/facultyregister/{collegeId}").hasAnyAuthority("COLLEGE", "HOD")
+                .requestMatchers("/getfaculty/{id}/{source}").hasAnyAuthority("COLLEGE", "HOD")
+                .requestMatchers("/updatefaculty/{facultyId}").hasAnyAuthority("COLLEGE", "HOD")
+                .requestMatchers("/deletefaculty/{id}").hasAnyAuthority("COLLEGE", "HOD")
+                .requestMatchers("/uploadFacultyExcel/{collegeId}").hasAnyAuthority("COLLEGE", "HOD")
                 
                 // Any other request needs authentication
                 .anyRequest().authenticated())

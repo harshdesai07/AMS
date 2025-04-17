@@ -1,38 +1,120 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
-  Users,
-  GraduationCap,
+  ChevronDown,
   ClipboardList,
+  Eye,
+  FileSpreadsheet,
+  GraduationCap,
   Menu,
-  X,
-  BookOpen,
+  Upload,
+  UserPlus,
+  Users,
+  X
 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import CollegeDataTable from "../data/CollegeDataTable";
 
 function HodDashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewType, setViewType] = useState(null);
-  const departmentId = "123"; // This would come from your auth context
-  const departmentName = "Computer Science"; // This would come from your auth context
+  const [isStudentOpen, setIsStudentOpen] = useState(false);
+  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
+  const [isSubjectOpen, setIsSubjectOpen] = useState(false);
+  const studentDropdownRef = useRef(null);
+  const facultyDropdownRef = useRef(null);
+  const subjectDropdownRef = useRef(null);
+  const departmentName = localStorage.getItem("departmentName");
+  const token = localStorage.getItem("hodToken");
+  const collegeId = localStorage.getItem("collegeId");
 
-  const handleViewFaculty = () => {
-    setViewType("faculty");
-    toast.success("Loading faculty members...");
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (studentDropdownRef.current && !studentDropdownRef.current.contains(event.target)) {
+        setIsStudentOpen(false);
+      }
+      if (facultyDropdownRef.current && !facultyDropdownRef.current.contains(event.target)) {
+        setIsFacultyOpen(false);
+      }
+      if (subjectDropdownRef.current && !subjectDropdownRef.current.contains(event.target)) {
+        setIsSubjectOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleFileUpload = async (event, type) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      console.error("No file selected.");
+      return;
+    }
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const validTypes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    const fileType = file.type;
+
+    if (validTypes.includes(fileType)) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        let endpoint;
+        if (type === 'student') {
+          endpoint = `http://localhost:8080/uploadStudentExcel/${collegeId}`;
+        } else if (type === 'faculty') {
+          endpoint = `http://localhost:8080/uploadFacultyExcel/${collegeId}`;
+        } else if (type === 'subject') {
+          endpoint = `http://localhost:8080/addSubjectsExcel`;
+        }
+
+        const response = await axios.post(
+          endpoint,
+          formData,
+          {
+            headers: { 
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} data uploaded successfully! Processing...`);
+          setTimeout(() => {
+            toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} data processed successfully!`);
+          }, 2000);
+        } else {
+          toast.error('File upload failed. Please try again.');
+        }
+      } catch (error) {
+        toast.error('Error uploading file: ' + error.message);
+      }
+    } else {
+      toast.error('Please upload only Excel files (.xls or .xlsx)');
+      event.target.value = '';
+    }
   };
 
-  const handleViewStudents = () => {
-    setViewType("students");
-    toast.success("Loading students...");
+  const handleNavigation = (path) => {
+    navigate(path, {
+      state: { 
+        userRole: "HOD",
+      }
+    });
   };
 
-  const handleAddSubject = () => {
-    toast.success("Opening subject form...");
-  };
-
-  const handleLogout = () => {
-    navigate("/");
+  const handleNoRecords = (type) => {
+    toast.error(`No ${type === "faculty" ? "faculty" : type === "student" ? "students" : "subjects"} found. Please add ${type === "faculty" ? "faculty" : type === "student" ? "students" : "subjects"} first.`);
   };
 
   return (
@@ -61,17 +143,11 @@ function HodDashboard() {
         </div>
 
         <nav className="p-4 space-y-2">
-          <button
-            onClick={handleViewFaculty}
-            className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
-          >
+          <button className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
             <Users className="w-5 h-5" />
             <span>Faculty</span>
           </button>
-          <button
-            onClick={handleViewStudents}
-            className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
-          >
+          <button className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
             <GraduationCap className="w-5 h-5" />
             <span>Students</span>
           </button>
@@ -97,8 +173,8 @@ function HodDashboard() {
               Department Dashboard
             </h2>
             <button
-              onClick={handleLogout}
-              className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              onClick={() => navigate("/")}
+              className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
             >
               Logout
             </button>
@@ -107,138 +183,216 @@ function HodDashboard() {
 
         {/* Main Dashboard Content */}
         <main className="p-6 space-y-6">
+          {/* Department Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800">Total Faculty</h3>
+              <p className="text-3xl font-bold text-purple-600 mt-2">24</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800">Total Students</h3>
+              <p className="text-3xl font-bold text-blue-600 mt-2">320</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800">Active Subjects</h3>
+              <p className="text-3xl font-bold text-amber-600 mt-2">12</p>
+            </div>
+          </div>
+
           {/* Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* View Faculty */}
-            <button
-              onClick={handleViewFaculty}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4"
-            >
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  View Faculty
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Manage department faculty
-                </p>
-              </div>
-            </button>
+            {/* Student Actions */}
+            <div className="relative" ref={studentDropdownRef}>
+              <button
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full"
+                onClick={() => {
+                  setIsStudentOpen(!isStudentOpen);
+                  setIsFacultyOpen(false);
+                  setIsSubjectOpen(false);
+                }}
+              >
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <UserPlus className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">Add Student</h3>
+                  <p className="text-sm text-gray-600 cursor-pointer">Register or upload students</p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isStudentOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isStudentOpen && (
+                <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-xl border overflow-hidden z-50">
+                  <button
+                    className="w-full px-4 py-3 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center cursor-pointer"
+                    onClick={() => {
+                      setIsStudentOpen(false);
+                      handleNavigation(`/studentRegistration/${collegeId}`);
+                    }}
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Student Registration
+                  </button>
+                  <label className="relative w-full flex items-center justify-center cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".xls,.xlsx"
+                      onChange={(e) => handleFileUpload(e, 'student')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="w-full px-4 py-3 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Excel
+                    </div>
+                  </label>
+                </div>
+              )}
+            </div>
 
             {/* View Students */}
             <button
-              onClick={handleViewStudents}
+              onClick={() => setViewType((prev) => (prev === "student" ? null : "student"))}
               className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4"
             >
-              <div className="bg-green-100 p-3 rounded-lg">
-                <GraduationCap className="w-6 h-6 text-green-600" />
+              <div className="bg-blue-100 p-3 rounded-lg">
+                <Eye className="w-6 h-6 text-blue-600" />
               </div>
               <div className="text-left">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  View Students
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">View Students</h3>
                 <p className="text-sm text-gray-600">Access student records</p>
               </div>
             </button>
 
-            {/* Add Subject */}
+            {/* Faculty Actions */}
+            <div className="relative" ref={facultyDropdownRef}>
+              <button
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full"
+                onClick={() => {
+                  setIsFacultyOpen(!isFacultyOpen);
+                  setIsStudentOpen(false);
+                  setIsSubjectOpen(false);
+                }}
+              >
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <UserPlus className="w-6 h-6 text-purple-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">Add Faculty</h3>
+                  <p className="text-sm text-gray-600 ">Register or upload faculty</p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isFacultyOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isFacultyOpen && (
+                <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-xl border overflow-hidden z-50">
+                  <button
+                    className="w-full px-4 py-3 text-left text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center cursor-pointer"
+                    onClick={() => {
+                      setIsFacultyOpen(false);
+                      handleNavigation(`/facultyRegistration/${collegeId}`);
+                    }}
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Faculty Registration
+                  </button>
+                  <label className="relative w-full flex items-center justify-center cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".xls,.xlsx"
+                      onChange={(e) => handleFileUpload(e, 'faculty')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="w-full px-4 py-3 text-left text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Excel
+                    </div>
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* View Faculty */}
             <button
-              onClick={handleAddSubject}
+              onClick={() => setViewType((prev) => (prev === "faculty" ? null : "faculty"))}
               className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4"
             >
               <div className="bg-purple-100 p-3 rounded-lg">
-                <BookOpen className="w-6 h-6 text-purple-600" />
+                <Eye className="w-6 h-6 text-purple-600" />
               </div>
               <div className="text-left">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Add Subject
-                </h3>
-                <p className="text-sm text-gray-600">Create new subject</p>
+                <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">View Faculty</h3>
+                <p className="text-sm text-gray-600">Access faculty records</p>
+              </div>
+            </button>
+
+            {/* Subject Actions */}
+            <div className="relative" ref={subjectDropdownRef}>
+              <button
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full"
+                onClick={() => {
+                  setIsSubjectOpen(!isSubjectOpen);
+                  setIsStudentOpen(false);
+                  setIsFacultyOpen(false);
+                }}
+              >
+                <div className="bg-amber-100 p-3 rounded-lg">
+                  <FileSpreadsheet className="w-6 h-6 text-amber-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">Add Subject</h3>
+                  <p className="text-sm text-gray-600">Upload subject data</p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isSubjectOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isSubjectOpen && (
+                <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-xl border overflow-hidden z-50">
+                  <div className="w-full px-4 py-3 text-left text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition-colors flex items-center cursor-pointer"
+                    onClick={() => navigate("/semesterSubject")}>
+                      <FileSpreadsheet className="w-4 h-4 mr-2" />
+                      Add Subjects
+                    </div>
+                  <label className="relative w-full flex items-center justify-center cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".xls,.xlsx"
+                      onChange={(e) => handleFileUpload(e, 'subject')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="w-full px-4 py-3 text-left text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition-colors flex items-center ">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Excel
+                    </div>
+                    
+                  </label>
+
+                  
+                </div>
+              )}
+            </div>
+
+            {/* View Subjects */}
+            <button
+              onClick={() => setViewType((prev) => (prev === "subjects" ? null : "subjects"))}
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4"
+            >
+              <div className="bg-amber-100 p-3 rounded-lg cursor-pointer">
+                <Eye className="w-6 h-6 text-amber-600" />
+              </div>
+              <div className="text-left ">
+                <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">View Subjects</h3>
+                <p className="text-sm text-gray-600">Access subject records</p>
               </div>
             </button>
           </div>
 
-          {/* Department Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Total Faculty
-              </h3>
-              <p className="text-3xl font-bold text-blue-600 mt-2">24</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Total Students
-              </h3>
-              <p className="text-3xl font-bold text-green-600 mt-2">320</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Active Subjects
-              </h3>
-              <p className="text-3xl font-bold text-purple-600 mt-2">12</p>
-            </div>
-          </div>
-
           {/* View Section */}
           {viewType && (
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                {viewType === "faculty"
-                  ? "Faculty Members"
-                  : "Department Students"}
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {viewType === "faculty" ? "Specialization" : "Year"}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {/* Sample row - You would map through your actual data here */}
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {viewType === "faculty"
-                            ? "Dr. John Doe"
-                            : "Alice Johnson"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {viewType === "faculty" ? "FAC001" : "STU001"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {viewType === "faculty"
-                            ? "Data Science"
-                            : "Third Year"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button className="text-blue-600 hover:text-blue-800">
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <div className="shadow-sm ">
+              <CollegeDataTable
+                type={viewType}
+                collegeId={collegeId}
+                onNoRecords={handleNoRecords}
+                token={token}
+                userRole="HOD"
+              />
             </div>
           )}
         </main>

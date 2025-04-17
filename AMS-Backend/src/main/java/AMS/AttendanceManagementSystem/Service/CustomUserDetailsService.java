@@ -45,11 +45,21 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<Faculty> facultyOpt = facultyRepo.findByFacultyEmail(email);
         if (facultyOpt.isPresent()) {
             Faculty faculty = facultyOpt.get();
-            return new CustomUserDetails(
-                faculty.getFacultyEmail(),
-                faculty.getFacultyPassword(),
-                "FACULTY"
-            );
+            
+            if(faculty.getFacultyDesignation().equals("HOD")) {
+            	return new CustomUserDetails(
+                        faculty.getFacultyEmail(),
+                        faculty.getFacultyPassword(),
+                        "HOD"
+                    );
+            }
+            else {
+            	return new CustomUserDetails(
+                        faculty.getFacultyEmail(),
+                        faculty.getFacultyPassword(),
+                        "FACULTY"
+                    );
+            }
         }
 
         // Check Student

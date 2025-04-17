@@ -1,7 +1,6 @@
 package AMS.AttendanceManagementSystem.Entity;
 
 import jakarta.persistence.*;
-import java.util.UUID;
 
 @Entity
 public class Faculty {

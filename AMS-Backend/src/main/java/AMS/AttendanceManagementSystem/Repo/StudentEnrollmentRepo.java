@@ -16,4 +16,14 @@ public interface StudentEnrollmentRepo extends JpaRepository<StudentEnrollment, 
 	
 	 @Query("SELECT se FROM StudentEnrollment se WHERE se.collegeCourseDepartment.collegeCourse.college.collegeId = :collegeId")
 	    List<StudentEnrollment> findByCollegeId(Integer collegeId);
+	 
+	  @Query("SELECT se FROM StudentEnrollment se " +
+	           "WHERE se.collegeCourseDepartment.collegeCourse.college.collegeId = :collegeId " +
+	           "AND se.collegeCourseDepartment.collegeCourse.course.name = :courseName " +
+	           "AND se.collegeCourseDepartment.department.name = :departmentName")
+	    List<StudentEnrollment> findEnrollmentsByCollegeCourseAndDepartment(
+	            Integer collegeId,
+	            String courseName,
+	            String departmentName
+	    );
 }

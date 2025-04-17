@@ -2,12 +2,17 @@ import { ArrowRight, GraduationCap, Lock, Mail } from 'lucide-react';
 import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import CloseButton from '../ui/CloseButton';
 
 export default function CollegeLogin() {
   const [collegeEmail, setCollegeEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const navigate = useNavigate();
+
+  const handleClose = () => {
+    navigate(-1);  // this takes you back to the previous page
+  };
 
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -41,7 +46,7 @@ export default function CollegeLogin() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           email: collegeEmail,
           password,
         }),
@@ -75,6 +80,12 @@ export default function CollegeLogin() {
       <div className="w-full max-w-md">
         {/* Card Container */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+
+          {/* Close Button */}
+          <div className="absolute top-4 right-4 z-10">
+            <CloseButton onClick={handleClose} />
+          </div>
+
           {/* Header Section */}
           <div className="px-8 pt-8 pb-6">
             <div className="text-center">

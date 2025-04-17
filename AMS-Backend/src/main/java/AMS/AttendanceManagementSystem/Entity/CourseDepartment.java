@@ -7,8 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
+@Table(
+	    name = "course_department",
+	    uniqueConstraints = {@UniqueConstraint(columnNames = {"course_id", "department_id"})}
+	)
 public class CourseDepartment {
 
     @Id

@@ -7,8 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
+@Table(
+	    name = "college_course",
+	    uniqueConstraints = {@UniqueConstraint(columnNames = {"college_id", "course_id"})}
+	)
 public class CollegeCourse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

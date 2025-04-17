@@ -71,9 +71,9 @@ public class StudentEnrollmentController {
 		
 //		get student data
 		@GetMapping("/getstudent/{collegeId}")
-		public ResponseEntity<?> getAllStudents(@PathVariable Integer collegeId){
+		public ResponseEntity<?> getStudents(@PathVariable Integer collegeId, @RequestParam String courseName, @RequestParam String departmentName){
 			
-			List<GetStudentDto> al=ses.findStudentsByCollegeId(collegeId);
+			List<GetStudentDto> al=ses.findStudents(collegeId, courseName, departmentName);
 			Map<String,String> res=new HashMap<>();
 			res.put("error","No student found");
 			

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import collegeList from "../data/collegeList";
+import CloseButton from '../ui/CloseButton';
 
 export default function CollegeRegistration() {
   const navigate = useNavigate();
@@ -18,6 +19,10 @@ export default function CollegeRegistration() {
   const [errors, setErrors] = useState({});
   const [filteredColleges, setFilteredColleges] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleClose = () => {
+    navigate(-1);  // this takes you back to the previous page
+  };
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -134,6 +139,12 @@ export default function CollegeRegistration() {
       <Toaster position="top-center" />
       <div className="w-full max-w-md mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+
+          {/* Close Button */}
+          <div className="absolute top-4 right-4 z-10">
+            <CloseButton onClick={handleClose} />
+          </div>
+
           {/* Header Section */}
           <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6">
             <div className="text-center">

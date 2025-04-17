@@ -209,11 +209,11 @@ public class StudentEnrollmentService {
 		sr.deleteById(studentId);
 	}
 
-//		get students all data by its colleg_id
-	public List<GetStudentDto> findStudentsByCollegeId(Integer collegeId) {
+//		get all student based on college and course and department
+	public List<GetStudentDto> findStudents(Integer collegeId, String courseName, String departmentName) {
 
 //			finding by college id
-		List<StudentEnrollment> ls = ser.findByCollegeId(collegeId);
+		List<StudentEnrollment> ls = ser.findEnrollmentsByCollegeCourseAndDepartment(collegeId, courseName, departmentName);
 
 //		storing student dto list
 		List<GetStudentDto> res = new ArrayList<>();

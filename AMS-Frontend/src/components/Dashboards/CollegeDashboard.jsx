@@ -27,11 +27,9 @@ export default function CollegeDashboard() {
   const collegeId = localStorage.getItem("collegeId");
   const collegeName = localStorage.getItem("collegeName");
   const token = localStorage.getItem("collegeToken");
-  const [isStudentOpen, setIsStudentOpen] = useState(false);
   const [isFacultyOpen, setIsFacultyOpen] = useState(false);
   const [hasCourses, setHasCourses] = useState(false);
   const [courses, setCourses] = useState([]);
-  const studentDropdownRef = useRef(null);
   const facultyDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -67,9 +65,6 @@ export default function CollegeDashboard() {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (studentDropdownRef.current && !studentDropdownRef.current.contains(event.target)) {
-        setIsStudentOpen(false);
-      }
       if (facultyDropdownRef.current && !facultyDropdownRef.current.contains(event.target)) {
         setIsFacultyOpen(false);
       }
@@ -82,7 +77,7 @@ export default function CollegeDashboard() {
   }, []);
 
   const handleNoRecords = (type) => {
-    toast.error(`No ${type === "student" ? "students" : "faculty"} found. please add ${type === "student" ? "students" : "faculty"} first.`);
+    toast.error(`No ${type === "faculty" ? "faculty" : "students"} found. Please add ${type === "faculty" ? "faculty" : "students"} first.`);
   };
 
   const handleFileUpload = async (event, type) => {
@@ -110,12 +105,7 @@ export default function CollegeDashboard() {
       formData.append('file', file);
 
       try {
-        let endpoint;
-        if (type === 'student') {
-          endpoint = `http://localhost:8080/uploadStudentExcel/${collegeId}`;
-        } else if (type === 'faculty') {
-          endpoint = `http://localhost:8080/uploadFacultyExcel/${collegeId}`;
-        }
+        const endpoint = `http://localhost:8080/uploadFacultyExcel/${collegeId}`;
 
         const response = await axios.post(
           endpoint,
@@ -129,9 +119,9 @@ export default function CollegeDashboard() {
         );
 
         if (response.status === 200) {
-          toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} data uploaded successfully! Processing...`);
+          toast.success('Faculty data uploaded successfully! Processing...');
           setTimeout(() => {
-            toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} data processed successfully!`);
+            toast.success('Faculty data processed successfully!');
           }, 2000);
         } else {
           toast.error('File upload failed. Please try again.');
@@ -150,7 +140,12 @@ export default function CollegeDashboard() {
       toast.error('Please add courses first');
       return;
     }
-    navigate(path);
+    navigate(path, {
+      state: { 
+        userRole: "COLLEGE",
+        courses: courses
+      }
+    });
   };
 
   return (
@@ -186,7 +181,7 @@ export default function CollegeDashboard() {
           </button>
           <button className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 cursor-pointer">
             <Users className="w-5 h-5" />
-            <span>Students</span>
+            <span>Faculty</span>
           </button>
           <button className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 cursor-pointer">
             <Calendar className="w-5 h-5" />
@@ -243,55 +238,6 @@ export default function CollegeDashboard() {
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Student Actions */}
-            <div className="relative" ref={studentDropdownRef}>
-              <button
-                className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full ${!hasCourses ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
-                onClick={() => {
-                  if (hasCourses) {
-                    setIsStudentOpen(!isStudentOpen);
-                    setIsFacultyOpen(false);
-                  }
-                }}
-                title={!hasCourses ? "Please add courses first" : ""}
-              >
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <UserPlus className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="text-left flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800">Add Student</h3>
-                  <p className="text-sm text-gray-600">Register or upload students</p>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isStudentOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {isStudentOpen && hasCourses && (
-                <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-xl border overflow-hidden z-50">
-                  <button
-                    className="w-full px-4 py-3 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center cursor-pointer"
-                    onClick={() => {
-                      setIsStudentOpen(false);
-                      handleNavigation(`/studentRegistration/${collegeId}`);
-                    }}
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Student Registration
-                  </button>
-                  <label className="relative w-full flex items-center justify-center cursor-pointer">
-                    <input
-                      type="file"
-                      accept=".xls,.xlsx"
-                      onChange={(e) => handleFileUpload(e, 'student')}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="w-full px-4 py-3 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Excel
-                    </div>
-                  </label>
-                </div>
-              )}
-            </div>
-
             {/* Faculty Actions */}
             <div className="relative" ref={facultyDropdownRef}>
               <button
@@ -299,7 +245,6 @@ export default function CollegeDashboard() {
                 onClick={() => {
                   if (hasCourses) {
                     setIsFacultyOpen(!isFacultyOpen);
-                    setIsStudentOpen(false);
                   }
                 }}
                 title={!hasCourses ? "Please add courses first" : ""}
@@ -308,8 +253,8 @@ export default function CollegeDashboard() {
                   <UserPlus className="w-6 h-6 text-purple-600" />
                 </div>
                 <div className="text-left flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800">Add Faculty</h3>
-                  <p className="text-sm text-gray-600">Register or upload faculty</p>
+                  <h3 className="text-lg font-semibold text-gray-800">Add HOD</h3>
+                  <p className="text-sm text-gray-600">Register or upload </p>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isFacultyOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -319,11 +264,11 @@ export default function CollegeDashboard() {
                     className="w-full px-4 py-3 text-left text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center cursor-pointer"
                     onClick={() => {
                       setIsFacultyOpen(false);
-                      handleNavigation(`/facultyRegistration/${collegeId}`);
+                      handleNavigation(`/hodRegistration/${collegeId}`);
                     }}
                   >
                     <UserPlus className="w-4 h-4 mr-2" />
-                    Faculty Registration
+                    HOD Registration
                   </button>
                   <label className="relative w-full flex items-center justify-center cursor-pointer">
                     <input
@@ -341,6 +286,20 @@ export default function CollegeDashboard() {
               )}
             </div>
 
+            {/* View Faculty */}
+            <button
+              onClick={() => setViewType((prev) => (prev === "faculty" ? null : "faculty"))}
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer"
+            >
+              <div className="bg-purple-100 p-3 rounded-lg">
+                <Eye className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-semibold text-gray-800">View HOD</h3>
+                <p className="text-sm text-gray-600">Access HOD records</p>
+              </div>
+            </button>
+
             {/* Course & Department */}
             <button
               onClick={() => navigate('/courseDepartment')}
@@ -355,33 +314,7 @@ export default function CollegeDashboard() {
               </div>
             </button>
 
-            {/* View Students */}
-            <button
-              onClick={() => setViewType((prev) => (prev === "student" ? null : "student"))}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer"
-            >
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <Eye className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold text-gray-800">View Students</h3>
-                <p className="text-sm text-gray-600">Access student records</p>
-              </div>
-            </button>
-
-            {/* View Faculty */}
-            <button
-              onClick={() => setViewType((prev) => (prev === "faculty" ? null : "faculty"))}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer"
-            >
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Eye className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold text-gray-800">View Faculty</h3>
-                <p className="text-sm text-gray-600">Access faculty records</p>
-              </div>
-            </button>
+            
           </div>
 
           {/* View Section */}
@@ -391,6 +324,8 @@ export default function CollegeDashboard() {
                 type={viewType}
                 collegeId={collegeId}
                 onNoRecords={handleNoRecords}
+                token={token}
+                userRole="COLLEGE"
               />
             </div>
           )}

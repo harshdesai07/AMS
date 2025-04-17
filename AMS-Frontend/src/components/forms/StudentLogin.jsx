@@ -3,12 +3,18 @@ import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import CloseButton from '../ui/CloseButton';
 
-export default  function studentLogin() {
+export default function studentLogin() {
   const [email, setEmail] = useState('');
   const [studentPassword, setStudentPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const navigate = useNavigate();
+
+  const handleClose = () => {
+    navigate(-1);  // this takes you back to the previous page
+  };
+
 
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -55,7 +61,7 @@ export default  function studentLogin() {
         if (response.data.studentId) {
           localStorage.setItem('studentId', response.data.studentId);
         }
-        
+
         toast.success('Login successful!');
         // Redirect to student dashboard
         navigate('/studentDashboard');
@@ -80,6 +86,12 @@ export default  function studentLogin() {
       <div className="w-full max-w-md">
         {/* Card Container */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+
+          {/* Close Button */}
+          <div className="absolute top-4 right-4 z-10">
+            <CloseButton onClick={handleClose} />
+          </div>
+
           {/* Header Section */}
           <div className="px-8 pt-8 pb-6">
             <div className="text-center">

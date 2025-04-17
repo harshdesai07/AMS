@@ -2,12 +2,17 @@ import { ArrowRight, Users, Lock, Mail } from 'lucide-react';
 import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import CloseButton from '../ui/CloseButton';
 
 function FacultyLogin() {
   const [email, setEmail] = useState('');
   const [facultyPassword, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const navigate = useNavigate();
+
+  const handleClose = () => {
+    navigate(-1);  // this takes you back to the previous page
+  };
 
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -47,18 +52,28 @@ function FacultyLogin() {
         }),
       });
 
+
+
       const data = await response.json();
       toast.dismiss(loadingToast);
 
       if (response.ok) {
-        localStorage.setItem('facultyToken', data.token);
-        localStorage.setItem('facultyEmail', email);
-        if (data.facultyId) {
-          localStorage.setItem('facultyId', data.facultyId);
+        console.log(data.token)
+        if (data.designation === 'HOD') {
+          localStorage.setItem('hodToken', data.token);
+          localStorage.setItem('hodCourse', data.course);
+          localStorage.setItem('hodDepartment', data.department)
+        }
+        else {
+          localStorage.setItem('facultyToken', data.token);
+          localStorage.setItem('facultyEmail', email);
+          if (data.facultyId) {
+            localStorage.setItem('facultyId', data.facultyId);
+          }
         }
 
         toast.success('Login successful!');
-        
+
         if (data.designation === 'HOD') {
           navigate('/hodDashboard');
         } else {
@@ -80,6 +95,12 @@ function FacultyLogin() {
       <div className="w-full max-w-md">
         {/* Card Container */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-[1.01] duration-300">
+
+          {/* Close Button */}
+          <div className="absolute top-4 right-4 z-10">
+            <CloseButton onClick={handleClose} />
+          </div>
+
           {/* Header Section */}
           <div className="px-8 pt-8 pb-6">
             <div className="text-center">

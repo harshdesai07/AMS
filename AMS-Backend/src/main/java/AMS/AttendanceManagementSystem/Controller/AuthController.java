@@ -39,14 +39,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto request) {
         try {
+
             // First attempt authentication
             Authentication authentication = authManager.authenticate(
+            	
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
 
             // If authentication successful, get user details
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             String jwt = jwtUtil.generateToken(userDetails, userDetails.getRole());
+            
             
             // Create response DTO
             LoginResponseDto response = new LoginResponseDto();
@@ -69,6 +72,12 @@ public class AuthController {
                 case "STUDENT":
                     // No additional details needed for student
                     break;
+                case "HOD":
+                	 Faculty hod = userDetailsService.getFacultyDetails(userDetails.getUsername());
+                	 response.setDesignation(hod.getFacultyDesignation());
+                	 response.setCourse(hod.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName());
+                	 response.setDepartment(hod.getCollegeCourseDepartment().getDepartment().getName());
+                	 break;     	
                 default:
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ErrorResponse("Invalid role"));

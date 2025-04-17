@@ -2,21 +2,26 @@ import axios from "axios";
 import { ChevronDown, PlusCircle, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import CloseButton from '../ui/CloseButton';
-import {useNavigate} from "react-router-dom";
 
- export default function CourseDepartment() {
-  const [courseSelections, setCourseSelections] = useState([]);
-  const [courses, setCourses] = useState([]);
+
+export default function SemesterSubject() {
+  const [semesterSelections, setSemesterSelections] = useState([]);
+  const [semesters, setSemesters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [newDepartmentInput, setNewDepartmentInput] = useState("");
+  const [newSubjectInput, setNewSubjectInput] = useState("");
   const dropdownRefs = useRef([]);
   const navigate = useNavigate();
   const BASE_URL = "http://localhost:8080";
   const collegeId = localStorage.getItem("collegeId");
-  const token = localStorage.getItem("collegeToken");
+  const token = localStorage.getItem("hodToken");
+
+  const handleClose = () => {
+    navigate(-1);  // this will send you back to the previous page
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,12 +38,8 @@ import {useNavigate} from "react-router-dom";
   }, [dropdownOpen]);
 
   useEffect(() => {
-    fetchCourses();
+    fetchSemesters();
   }, []);
-
-  const handleClose = () => {
-    navigate(-1);  // this takes you back to the previous page
-  };
 
   const handleDropdownClick = async (index) => {
     if (dropdownOpen === index) {
@@ -49,208 +50,211 @@ import {useNavigate} from "react-router-dom";
     setDropdownOpen(index);
   };
 
-  const fetchCourses = async () => {
+  const fetchSemesters = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/getCourses`);
+      const courseName = localStorage.getItem("hodCourse");
+      const response = await axios.get(`${BASE_URL}/getSemester/${courseName}`,);
+
       if (!response.status === 200) {
-        throw new Error("Failed to fetch courses");
+        throw new Error("Failed to fetch semesters");
       }
       const data = await response.data;
-      setCourses(data);
+      setSemesters(data);
     } catch (error) {
-      console.error("Error fetching courses:", error);
-      toast.error("Failed to load courses");
+      console.error("Error fetching semesters:", error);
+      toast.error("Failed to load semesters");
     }
   };
 
-  const fetchDepartments = async (courseId, index) => {
-    const loadingToast = toast.loading("Loading departments...");
+  const fetchSubjects = async (semesterNumber, index) => {
+    const loadingToast = toast.loading("Loading subjects...");
     setLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}/departments/${courseId}`);
-  
+      const response = await axios.get(`${BASE_URL}/getSubjects`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          departmentName: localStorage.getItem("hodDepartment"),
+          semesterNumber: semesterNumber,
+        }
+      });
+
       if (response.status === 404) {
-        setCourseSelections((prevSelections) => {
+        setSemesterSelections((prevSelections) => {
           const newSelections = [...prevSelections];
-          newSelections[index].departments = [
-            { id: "none", name: "none" },
-          ];
+          newSelections[index].subjects = [];
           return newSelections;
         });
         toast.dismiss(loadingToast);
         return;
       }
-  
+
       if (response.status !== 200) {
-        throw new Error("Error fetching departments");
+        throw new Error("Error fetching subjects");
       }
-  
+
       const data = await response.data;
-  
-      setCourseSelections((prevSelections) => {
+
+      setSemesterSelections((prevSelections) => {
         const newSelections = [...prevSelections];
-        newSelections[index].departments =
-          data.length > 0 ? data : [{ id: "none", name: "none" }];
+        newSelections[index].subjects = data || [];
         return newSelections;
       });
-  
-      toast.success("Departments loaded successfully", { id: loadingToast });
+
+      toast.success("Subjects loaded successfully", { id: loadingToast });
     } catch (error) {
-      console.error("Error fetching departments:", error);
-      toast.error("Failed to load departments", { id: loadingToast });
+      console.error("Error fetching subjects:", error);
+      toast.error("Failed to load subjects", { id: loadingToast });
     } finally {
       setLoading(false);
     }
   };
-  
 
-  const handleAddCourseSelection = () => {
-    setCourseSelections([
-      ...courseSelections,
+  const handleAddSemesterSelection = () => {
+    setSemesterSelections([
+      ...semesterSelections,
       {
-        course: null,
-        departments: [],
-        manualDepartments: [],
+        semester: null,
+        subjects: [],
+        manualSubjects: [],
       },
     ]);
-    toast.success("New course selection added");
+    toast.success("New semester selection added");
   };
 
-  const handleRemoveCourseSelection = (index) => {
-    setCourseSelections(courseSelections.filter((_, i) => i !== index));
-    toast.success("Course selection removed");
+  const handleRemoveSemesterSelection = (index) => {
+    setSemesterSelections(semesterSelections.filter((_, i) => i !== index));
+    toast.success("Semester selection removed");
   };
 
-  const handleCourseChange = async (index, selectedCourse) => {
-    const newSelections = [...courseSelections];
+  const handleSemesterChange = async (index, selectedSemester) => {
+    const newSelections = [...semesterSelections];
     newSelections[index] = {
       ...newSelections[index],
-      course: selectedCourse,
-      departments: [],
-      manualDepartments: [],
+      semester: selectedSemester,
+      subjects: [],
+      manualSubjects: [],
     };
-    setCourseSelections(newSelections);
+    setSemesterSelections(newSelections);
     setDropdownOpen(null);
     setSearchTerm("");
 
-    if (selectedCourse) {
-      await fetchDepartments(selectedCourse.id, index);
+    if (selectedSemester) {
+      await fetchSubjects(selectedSemester.semesterNumber, index);
     }
   };
 
-  const handleDepartmentChange = (courseIndex, department) => {
-    const newSelections = [...courseSelections];
-    const currentDepartments = newSelections[courseIndex].departments;
+  const handleSubjectChange = (semesterIndex, subject) => {
+    const newSelections = [...semesterSelections];
+    const currentSubjects = newSelections[semesterIndex].subjects;
 
-    if (currentDepartments.find((d) => d.id === department.id)) {
-      newSelections[courseIndex].departments = currentDepartments.filter(
-        (d) => d.id !== department.id
+    if (currentSubjects.find((s) => s.id === subject.id)) {
+      newSelections[semesterIndex].subjects = currentSubjects.filter(
+        (s) => s.id !== subject.id
       );
     } else {
-      newSelections[courseIndex].departments = [
-        ...currentDepartments,
-        department,
+      newSelections[semesterIndex].subjects = [
+        ...currentSubjects,
+        subject,
       ];
     }
 
-    setCourseSelections(newSelections);
+    setSemesterSelections(newSelections);
   };
 
-  const handleManualDepartmentAdd = (courseIndex) => {
-    if (!newDepartmentInput.trim()) return;
+  const handleManualSubjectAdd = (semesterIndex) => {
+    if (!newSubjectInput.trim()) return;
 
-    const newSelections = [...courseSelections];
-    const manualDepartments =
-      newSelections[courseIndex].manualDepartments || [];
+    const newSelections = [...semesterSelections];
+    const manualSubjects = newSelections[semesterIndex].manualSubjects || [];
 
-    if (!manualDepartments.includes(newDepartmentInput.trim())) {
-      newSelections[courseIndex].manualDepartments = [
-        ...manualDepartments,
-        newDepartmentInput.trim(),
+    if (!manualSubjects.includes(newSubjectInput.trim())) {
+      newSelections[semesterIndex].manualSubjects = [
+        ...manualSubjects,
+        newSubjectInput.trim(),
       ];
-      setCourseSelections(newSelections);
-      setNewDepartmentInput("");
-      toast.success("Department added successfully");
+      setSemesterSelections(newSelections);
+      setNewSubjectInput("");
+      toast.success("Subject added successfully");
     } else {
-      toast.error("Department already exists");
+      toast.error("Subject already exists");
     }
   };
 
-  const handleRemoveManualDepartment = (courseIndex, departmentName) => {
-    const newSelections = [...courseSelections];
-    newSelections[courseIndex].manualDepartments = newSelections[
-      courseIndex
-    ].manualDepartments.filter((d) => d !== departmentName);
-    setCourseSelections(newSelections);
-    toast.success("Department removed");
+  const handleRemoveManualSubject = (semesterIndex, subjectName) => {
+    const newSelections = [...semesterSelections];
+    newSelections[semesterIndex].manualSubjects = newSelections[
+      semesterIndex
+    ].manualSubjects.filter((s) => s !== subjectName);
+    setSemesterSelections(newSelections);
+    toast.success("Subject removed");
   };
 
-  const filteredCourses = courses.filter((course) =>
-    course.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSemesters = semesters.filter(
+    (semester) => semester?.semesterNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+
   const handleSubmit = async () => {
-    const hasEmptyDepartments = courseSelections.some(
+    const hasEmptySubjects = semesterSelections.some(
       (selection) =>
-        selection.departments.length === 0 &&
-        selection.manualDepartments.length === 0
+        selection.subjects.length === 0 &&
+        selection.manualSubjects.length === 0
     );
-    
-    if (hasEmptyDepartments) {
-      toast.error("Every course must have at least one department selected or added.");
-      return;
-    }
-    
 
-    const hasAllCourses = courseSelections.every(
-      (selection) => selection.course
-    );
-    if (!hasAllCourses) {
-      toast.error("Please select a course for all entries.");
+    if (hasEmptySubjects) {
+      toast.error("Every semester must have at least one subject selected or added.");
       return;
     }
 
-    const formattedData = courseSelections.map((selection) => {
-      const selectedDeptNames = selection.departments.map((dept) => dept.name);
-      const manualDeptNames = selection.manualDepartments;
-    
-      let combinedDepartments = [];
-    
-      if (selectedDeptNames.length > 0 && manualDeptNames.length > 0) {
-        combinedDepartments = [...selectedDeptNames, ...manualDeptNames];
-      } else if (selectedDeptNames.length > 0) {
-        combinedDepartments = selectedDeptNames;
-      } else if (manualDeptNames.length > 0) {
-        combinedDepartments = manualDeptNames;
+    const hasAllSemesters = semesterSelections.every(
+      (selection) => selection.semester
+    );
+    if (!hasAllSemesters) {
+      toast.error("Please select a semester for all entries.");
+      return;
+    }
+
+    const formattedData = semesterSelections.map((selection) => {
+      const selectedSubjectNames = selection.subjects.map((subj) => subj.name);
+      const manualSubjectNames = selection.manualSubjects;
+
+      let combinedSubjects = [];
+
+      if (selectedSubjectNames.length > 0 && manualSubjectNames.length > 0) {
+        combinedSubjects = [...selectedSubjectNames, ...manualSubjectNames];
+      } else if (selectedSubjectNames.length > 0) {
+        combinedSubjects = selectedSubjectNames;
+      } else if (manualSubjectNames.length > 0) {
+        combinedSubjects = manualSubjectNames;
       }
-    
+
       return {
-        collegeId: collegeId,
-        courseName: selection.course.name,
-        departments: combinedDepartments,
+        semester: selection.semester.semesterNumber,
+        subjects: combinedSubjects,
       };
     });
-    
 
-    const saveToast = toast.loading("Saving courses and departments...");
+    const saveToast = toast.loading("Saving semesters and subjects...");
     try {
       console.log(formattedData);
       const response = await axios.post(
-        `${BASE_URL}/addCourseDept`, 
-        formattedData,  // Send formattedData as the request body
+        `${BASE_URL}/addSubjects`,
+        formattedData,
         {
-          headers: {  // Set headers as a separate config object
+          headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
 
       if (response.status === 200) {
-        toast.success("Courses and departments saved successfully!", {
+        toast.success("Semesters and subjects saved successfully!", {
           id: saveToast,
         });
-        setCourseSelections([]);
+        setSemesterSelections([]);
       }
     } catch (error) {
       console.error("Error saving data:", error);
@@ -263,27 +267,26 @@ import {useNavigate} from "react-router-dom";
       <Toaster position="top-right" />
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-          
-        <div className="flex justify-end">
-  <CloseButton onClick={handleClose} />
-</div>
 
-          
+          <div className="flex justify-end">
+            <CloseButton onClick={handleClose} />
+          </div>
+
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            Course and Department Management
+            Semester and Subject Management
           </h1>
 
-          {courseSelections.map((selection, index) => (
+          {semesterSelections.map((selection, index) => (
             <div
               key={index}
               className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50"
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-gray-700">
-                  Course Selection {index + 1}
+                  Semester Selection {index + 1}
                 </h2>
                 <button
-                  onClick={() => handleRemoveCourseSelection(index)}
+                  onClick={() => handleRemoveSemesterSelection(index)}
                   className="text-red-500 hover:text-red-600 transition-colors"
                 >
                   <X size={20} />
@@ -295,7 +298,7 @@ import {useNavigate} from "react-router-dom";
                   <div className="flex-1">
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Course
+                        Semester
                       </label>
                     </div>
 
@@ -308,12 +311,11 @@ import {useNavigate} from "react-router-dom";
                         className="flex justify-between items-center w-full px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:border-blue-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       >
                         <span>
-                          {selection.course?.name || "Choose a course"}
+                          {selection.semester?.semesterNumber || "Choose a semester"}
                         </span>
                         <ChevronDown
-                          className={`h-5 w-5 text-gray-400 transition-transform ${
-                            dropdownOpen === index ? "transform rotate-180" : ""
-                          }`}
+                          className={`h-5 w-5 text-gray-400 transition-transform ${dropdownOpen === index ? "transform rotate-180" : ""
+                            }`}
                         />
                       </button>
 
@@ -323,26 +325,26 @@ import {useNavigate} from "react-router-dom";
                             <input
                               type="text"
                               className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                              placeholder="Search courses..."
+                              placeholder="Search semesters..."
                               value={searchTerm}
                               onChange={(e) => setSearchTerm(e.target.value)}
                             />
                           </div>
                           {loading ? (
                             <div className="p-2 text-gray-500 text-center">
-                              Loading courses...
+                              Loading semesters...
                             </div>
                           ) : (
                             <div className="max-h-60 overflow-auto">
-                              {filteredCourses.map((course) => (
+                              {filteredSemesters.map((semester) => (
                                 <button
-                                  key={course.id}
+                                  key={semester.id}
                                   className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                                   onClick={() =>
-                                    handleCourseChange(index, course)
+                                    handleSemesterChange(index, semester)
                                   }
                                 >
-                                  {course.name}
+                                  {semester.semesterNumber}
                                 </button>
                               ))}
                             </div>
@@ -353,31 +355,27 @@ import {useNavigate} from "react-router-dom";
                   </div>
                 </div>
 
-                {selection.course && (
+                {selection.semester && (
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Departments
+                        Subjects
                       </label>
                     </div>
 
-                    {selection.departments.length === 0 ? (
-                      <div className="text-red-600 mb-4">
-                        No departments found. Add manually.
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-2">
-                        {selection.departments.map((department) => (
+                    {selection.subjects.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        {selection.subjects.map((subject) => (
                           <div
-                            key={department.id}
+                            key={subject.id}
                             className="flex items-center justify-between p-2 border border-gray-200 rounded hover:bg-gray-50 transition-colors"
                           >
                             <span className="text-sm text-gray-700">
-                              {department.name}
+                              {subject.name}
                             </span>
                             <button
                               onClick={() =>
-                                handleDepartmentChange(index, department)
+                                handleSubjectChange(index, subject)
                               }
                               className="text-red-500 hover:text-red-600"
                             >
@@ -393,34 +391,34 @@ import {useNavigate} from "react-router-dom";
                         <input
                           type="text"
                           className="flex-1 rounded-md border-gray-300"
-                          placeholder="Enter department name"
-                          value={newDepartmentInput}
+                          placeholder="Enter subject name"
+                          value={newSubjectInput}
                           onChange={(e) =>
-                            setNewDepartmentInput(e.target.value)
+                            setNewSubjectInput(e.target.value)
                           }
                           onKeyPress={(e) => {
                             if (e.key === "Enter") {
-                              handleManualDepartmentAdd(index);
+                              handleManualSubjectAdd(index);
                             }
                           }}
                         />
                         <button
-                          onClick={() => handleManualDepartmentAdd(index)}
+                          onClick={() => handleManualSubjectAdd(index)}
                           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                         >
                           Add
                         </button>
                       </div>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {selection.manualDepartments?.map((dept, deptIndex) => (
+                        {selection.manualSubjects?.map((subj, subjIndex) => (
                           <div
-                            key={deptIndex}
+                            key={subjIndex}
                             className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded"
                           >
-                            <span>{dept}</span>
+                            <span>{subj}</span>
                             <button
                               onClick={() =>
-                                handleRemoveManualDepartment(index, dept)
+                                handleRemoveManualSubject(index, subj)
                               }
                               className="text-blue-600 hover:text-blue-800"
                             >
@@ -438,16 +436,16 @@ import {useNavigate} from "react-router-dom";
 
           <div className="flex justify-between mt-6">
             <button
-              onClick={handleAddCourseSelection}
+              onClick={handleAddSemesterSelection}
               className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
             >
               <PlusCircle className="mr-2 h-5 w-5" />
-              Add Another Course
+              Add Another Semester
             </button>
 
             <button
               onClick={handleSubmit}
-              disabled={courseSelections.length === 0}
+              disabled={semesterSelections.length === 0}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
             >
               Save All
