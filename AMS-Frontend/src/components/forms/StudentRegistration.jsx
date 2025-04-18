@@ -20,7 +20,7 @@ export default function StudentRegistration() {
   const { id: paramId } = useParams();
   const studentId = paramId || studentData?.studentId;
   const BASE_URL = "http://localhost:8080";
-  const collegeId = localStorage.getItem("collegeId");
+  const collegeId = localStorage.getItem("hodCollegeId");
   const token = localStorage.getItem("hodToken");
   const storedCourse = localStorage.getItem("hodCourse");
   const storedDepartment = localStorage.getItem("hodDepartment");
@@ -49,6 +49,10 @@ export default function StudentRegistration() {
       });
     }
   }, []);
+  
+  const handleClose = () => {
+    navigate(-1);  // this takes you back to the previous page
+  };
 
   useEffect(() => {
     const extractCountryCode = (phoneNumber) => {
@@ -56,9 +60,6 @@ export default function StudentRegistration() {
       return phoneNumber.slice(0, -10);
     };
 
-    const handleClose = () => {
-      navigate(-1);  // this takes you back to the previous page
-    };
 
     const extractPhoneNumber = (phoneNumber) => {
       if (!phoneNumber) return "";

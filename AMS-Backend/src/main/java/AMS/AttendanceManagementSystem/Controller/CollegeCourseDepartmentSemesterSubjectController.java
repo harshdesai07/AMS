@@ -72,16 +72,21 @@ public class CollegeCourseDepartmentSemesterSubjectController {
     //get the list of subjects semester wise of a department of a particular college
     @GetMapping("/getSubjectsSemesterwise/{collegeId}")
     public ResponseEntity<?> geAllSubjectsBySemester(@PathVariable Integer collegeId, @RequestParam String courseName, @RequestParam String departmentName){
-    	List<SubjectDto> dto = ccdsss.findAllSubjectsBySemester(collegeId, courseName, departmentName);
-    	
     	HashMap<String, String> response = new HashMap<>();
     	
-    	if(dto.isEmpty()) {
-    		response.put("error", "Unable to find subjects");
-    		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+    	try {
+    		List<SubjectDto> dto = ccdsss.findAllSubjectsBySemester(collegeId, courseName, departmentName);
+        	
+        	if(dto.isEmpty()) {
+        		response.put("error", "Unable to find subjects");
+        		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+        	}
+        	
+        	return ResponseEntity.ok(dto);
+    	} catch(Exception e) {
+    		response.put("error", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     	}
-    	
-    	return ResponseEntity.ok(dto);
     	
     }
     

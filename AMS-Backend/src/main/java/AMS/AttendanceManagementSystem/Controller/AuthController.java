@@ -77,6 +77,7 @@ public class AuthController {
                 	 response.setDesignation(hod.getFacultyDesignation());
                 	 response.setCourse(hod.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName());
                 	 response.setDepartment(hod.getCollegeCourseDepartment().getDepartment().getName());
+                	 response.setCollegeId(hod.getCollegeCourseDepartment().getCollegeCourse().getCollege().getCollegeId());
                 	 break;     	
                 default:
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)

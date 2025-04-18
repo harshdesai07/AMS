@@ -53,6 +53,11 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
             params: commonParams,
           });
           break;
+        case "courseDepartment":
+          response = await axios.get(`${base_url}/getCoursesAndDepartments/${collegeId}`, {
+            headers: commonHeaders,
+          });
+          break;
         default:
           setData([]);
           setIsLoading(false);
@@ -68,6 +73,12 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
           semester && semester.semester && Array.isArray(semester.subjects)
         );
         setData(validSubjectsData);
+      } else if (type === 'courseDepartment') {
+        // Ensure course-department data is correctly structured
+        const validCourseDepartmentData = resultArray.filter(course => 
+          course && course.courseName && Array.isArray(course.departments)
+        );
+        setData(validCourseDepartmentData);
       } else {
         const transformedData = type === 'faculty' ? resultArray.map(faculty => ({
           facultyId: faculty.facultyId,
@@ -229,6 +240,46 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
     );
   };
 
+  const renderCourseDepartmentTable = () => {
+    // Early return if data is not an array or is empty
+    if (!Array.isArray(data) || data.length === 0) return null;
+
+    return (
+      <>
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-100 text-gray-800">
+          <h2 className="text-lg font-semibold">Course-Department List</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-3 text-left text-gray-700 font-semibold border border-gray-300">Course</th>
+                <th className="p-3 text-left text-gray-700 font-semibold border border-gray-300">Department</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((course) => (
+                course.departments && course.departments.map((department, deptIndex) => (
+                  <tr key={`${course.courseName}-${department}-${deptIndex}`} className="hover:bg-gray-100">
+                    {deptIndex === 0 && (
+                      <td
+                        className="p-3 text-gray-700 border border-gray-300"
+                        rowSpan={course.departments.length}
+                      >
+                        {course.courseName}
+                      </td>
+                    )}
+                    <td className="p-3 text-gray-700 border border-gray-300">{department}</td>
+                  </tr>
+                ))
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
+
   const renderDataTable = () => {
     const validType = type === "student" || type === "faculty" ? type : null;
     if (!validType || !Array.isArray(data) || data.length === 0) return null;
@@ -280,9 +331,13 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
     return (
       <>
         <div className="flex items-center justify-between px-4 py-3 bg-gray-100 text-gray-800">
-          <h2 className="text-lg font-semibold">
-            {validType === "student" ? "Student List" : "Faculty List"}
-          </h2>
+        <h2 className="text-lg font-semibold">
+  {userRole === "COLLEGE"
+    ? "HOD List"
+    : validType === "student"
+    ? "Student List"
+    : "Faculty List"}
+</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -329,7 +384,12 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
 
   return (
     <div className="w-full">
-      {type === 'subjects' ? renderSubjectsTable() : renderDataTable()}
+      {type === 'subjects' 
+        ? renderSubjectsTable() 
+        : type === 'courseDepartment'
+        ? renderCourseDepartmentTable()
+        : renderDataTable()
+      }
     </div>
   );
 };

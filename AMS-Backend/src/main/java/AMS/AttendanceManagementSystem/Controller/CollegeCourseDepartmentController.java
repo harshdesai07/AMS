@@ -47,8 +47,7 @@ public class CollegeCourseDepartmentController {
 	        return ResponseEntity.ok(response);
 	}
 	
-//	get all department by college id and course name for particular college and course
-	
+//	get all department by college id and course name for particular college and course	
 	@GetMapping("/getDepartments/{collegeId}/{courseName}")
 	public ResponseEntity<?> getDepartmentByCollegeidAndCourseName(@PathVariable Integer collegeId,@PathVariable String courseName){
 
@@ -60,6 +59,26 @@ public class CollegeCourseDepartmentController {
 		
 		return ResponseEntity.ok(ans);
 		
+	}
+	
+	//get all the courses and departments offered by college
+	@GetMapping("/getCoursesAndDepartments/{collegeId}")
+	public ResponseEntity<?> getCoursesDepartmentsByCollege(@PathVariable Integer collegeId){
+		HashMap<String, String> response = new HashMap<>();
+		
+		try {
+			List<CollegeCourseDepartmentDto> dto = ccds.findAllCoursesAndDepartmentsForCollege(collegeId);
+			
+			if(dto.isEmpty()) {
+				response.put("error", "No courses and department found");
+				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+			}
+			
+			return ResponseEntity.ok(dto);
+		} catch(Exception e) {
+			response.put("error", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		}
 	}
 	
 }

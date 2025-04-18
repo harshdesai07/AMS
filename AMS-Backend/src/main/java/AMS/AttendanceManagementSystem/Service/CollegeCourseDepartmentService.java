@@ -1,12 +1,16 @@
 package AMS.AttendanceManagementSystem.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import AMS.AttendanceManagementSystem.Dto.CollegeCourseDepartmentDto;
 import AMS.AttendanceManagementSystem.Entity.College;
 import AMS.AttendanceManagementSystem.Entity.CollegeCourse;
 import AMS.AttendanceManagementSystem.Entity.CollegeCourseDepartment;
@@ -125,6 +129,49 @@ public List<Department> findDepartment(Integer collegeId, String CourseName) {
 	
 	return ccdr.findDepartmentsByCourseNameAndCollegeId(CourseName, collegeId);
 	
+}
+
+//finds the course and its department for a particular college
+public List<CollegeCourseDepartmentDto> findAllCoursesAndDepartmentsForCollege(Integer collegeId){
+	
+	//1. fetch all the courses and department offered by college
+	List<Object[]> rawResults = ccdr.findCoursesAndDepartmentsByCollegeId(collegeId);
+	
+	if(rawResults.isEmpty()) throw new RuntimeException("No courses and departments found");
+	
+    // 2. Group by course name 
+   //key -> course, value -> departments
+	HashMap<String, List<String>> courseMap = new LinkedHashMap<>();
+	
+	for(Object[] row :rawResults) {
+		String courseName = (String) row[0];
+		String departmentName = (String) row[1];
+		
+		if(courseMap.containsKey(courseName)) {
+			List<String> al = courseMap.get(courseName);
+			al.add(departmentName);
+			
+			courseMap.put(courseName, al);
+		}
+		else {
+			List<String> al = new ArrayList<>();
+			al.add(departmentName);
+			
+			courseMap.put(courseName, al);
+		}
+	}
+	
+	//3. create List<collegeCourseDepartment>
+	List<CollegeCourseDepartmentDto> result = new ArrayList<>();
+	 
+	for(Map.Entry<String, List<String>> entry: courseMap.entrySet()) {
+		CollegeCourseDepartmentDto dto = new CollegeCourseDepartmentDto();
+		dto.setCourseName(entry.getKey());
+		dto.setDepts(entry.getValue());
+		result.add(dto);
+	}
+	
+	return result;
 }
 	
 }

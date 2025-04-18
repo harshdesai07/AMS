@@ -4,7 +4,6 @@ export default function LogoutButton() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
     navigate("/"); // Redirect to Home page
   };
 

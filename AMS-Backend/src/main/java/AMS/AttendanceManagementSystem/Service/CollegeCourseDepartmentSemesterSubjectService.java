@@ -260,7 +260,9 @@ public class CollegeCourseDepartmentSemesterSubjectService {
 	    List<Object[]> rawResults = ccdssr.findSemesterSubjectsByCollegeCourseAndDepartment(
 	            collegeId, courseName, departmentName);
 	    
-	    // 2. Group by semester name (using TreeMap to maintain semester order)
+	    if(rawResults.isEmpty()) throw new RuntimeException("No data found!");
+	    
+	    // 2. Group by semester name 
 	    //key -> semester, value -> subjects
 	    Map<String, List<String>> semesterMap = new LinkedHashMap<>();
 	    

@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .requestMatchers("/courses/{collegeId}").hasAuthority("COLLEGE")
                 .requestMatchers("/addCourseDept").hasAuthority("COLLEGE")
                 .requestMatchers("/getDepartments/{collegeId}/{courseName}").hasAuthority("COLLEGE")
+                .requestMatchers("/getCoursesAndDepartments/{collegeId}").hasAuthority("COLLEGE")
                 
                 // HOD end points
                 .requestMatchers("/addSubjects").hasAuthority("HOD")

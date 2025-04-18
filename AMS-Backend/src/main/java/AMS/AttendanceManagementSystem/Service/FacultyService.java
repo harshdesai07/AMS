@@ -107,25 +107,17 @@ public class FacultyService implements UserDetailsService {
 
 		fr.save(faculty);
 		
-//		this code will send personal detail of faculty to their email
-		es.sendFacultyPersonalDetailsConfirmation(faculty.getFacultyEmail(),
+//		this code will send personal detail and login credential of faculty to their email
+		es.sendFacultyDetailsAndCredentials(faculty.getFacultyEmail(),
 				faculty.getFacultyName(),
 				faculty.getFacultyNumber(),
 				faculty.getFacultyDesignation(),
 				collegeCourseDepartment.getCollegeCourse().getCourse().getName(),
 				collegeCourseDepartment.getDepartment().getName(),
 				collegeCourseDepartment.getCollegeCourse().getCollege().getCollegeName(),
-				collegeCourseDepartment.getCollegeCourse().getCollege().getEmail(),
-				"📋 Respected Faculty Please Confirm Your Personal Details");
-		        
-//		this code will send login credential of faculty to their email id
-		
-		es.sendLoginCredentials(faculty.getFacultyEmail(),
-				faculty.getFacultyName(),
 				rawPassword,
-				college.getCollegeName(),
-				college.getEmail(),
-				"🔐 Your Login Credentials");
+				collegeCourseDepartment.getCollegeCourse().getCollege().getEmail(),
+				"📋 Respected Faculty Please Confirm Your Personal Details And Check 🔐 Your Login Credentials");
 	
 
 	}
@@ -194,7 +186,7 @@ public class FacultyService implements UserDetailsService {
 		fr.save(faculty);
 		
 //		this code will send updated personal detail of faculty to their email
-		es.sendFacultyPersonalDetailsConfirmation(faculty.getFacultyEmail(),
+		es.sendUpdatedFacultyInformation(faculty.getFacultyEmail(),
 				faculty.getFacultyName(),
 				faculty.getFacultyNumber(),
 				faculty.getFacultyDesignation(),
@@ -271,25 +263,17 @@ public class FacultyService implements UserDetailsService {
 
 			fr.save(faculty);
 			
-//			this code will send personal detail of faculty to their email
-			es.sendFacultyPersonalDetailsConfirmation(faculty.getFacultyEmail(),
+//			this code will send personal detail and login credential of faculty to their email
+			es.sendFacultyDetailsAndCredentials(faculty.getFacultyEmail(),
 					faculty.getFacultyName(),
 					faculty.getFacultyNumber(),
 					faculty.getFacultyDesignation(),
 					collegeCourseDepartment.getCollegeCourse().getCourse().getName(),
 					collegeCourseDepartment.getDepartment().getName(),
 					collegeCourseDepartment.getCollegeCourse().getCollege().getCollegeName(),
-					collegeCourseDepartment.getCollegeCourse().getCollege().getEmail(),
-					"📋 Respected Faculty Please Confirm Your Personal Details");
-			        
-//			this code will send login credential of faculty to their email id
-			
-			es.sendLoginCredentials(faculty.getFacultyEmail(),
-					faculty.getFacultyName(),
 					rawPassword,
-					college.getCollegeName(),
-					college.getEmail(),
-					"🔐 Your Login Credentials");
+					collegeCourseDepartment.getCollegeCourse().getCollege().getEmail(),
+					"📋 Respected Faculty Please Confirm Your Personal Details And Check 🔐 Your Login Credentials");
 		}
 	}
 

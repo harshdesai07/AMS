@@ -28,7 +28,7 @@ function HodDashboard() {
   const subjectDropdownRef = useRef(null);
   const departmentName = localStorage.getItem("departmentName");
   const token = localStorage.getItem("hodToken");
-  const collegeId = localStorage.getItem("collegeId");
+  const collegeId = localStorage.getItem("hodCollegeId");
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -204,15 +204,15 @@ function HodDashboard() {
             {/* Student Actions */}
             <div className="relative" ref={studentDropdownRef}>
               <button
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full"
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full cursor-pointer group"
                 onClick={() => {
                   setIsStudentOpen(!isStudentOpen);
                   setIsFacultyOpen(false);
                   setIsSubjectOpen(false);
                 }}
               >
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <UserPlus className="w-6 h-6 text-blue-600" />
+                <div className="bg-blue-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-blue-200">
+                  <UserPlus className="w-6 h-6 text-blue-600 transition-all duration-200 group-hover:scale-110" />
                 </div>
                 <div className="text-left flex-1">
                   <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">Add Student</h3>
@@ -251,10 +251,10 @@ function HodDashboard() {
             {/* View Students */}
             <button
               onClick={() => setViewType((prev) => (prev === "student" ? null : "student"))}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4"
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
             >
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <Eye className="w-6 h-6 text-blue-600" />
+              <div className="bg-blue-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-blue-200">
+                <Eye className="w-6 h-6 text-blue-600 transition-all duration-200 group-hover:scale-110" />
               </div>
               <div className="text-left">
                 <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">View Students</h3>
@@ -265,15 +265,15 @@ function HodDashboard() {
             {/* Faculty Actions */}
             <div className="relative" ref={facultyDropdownRef}>
               <button
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full"
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full cursor-pointer group"
                 onClick={() => {
                   setIsFacultyOpen(!isFacultyOpen);
                   setIsStudentOpen(false);
                   setIsSubjectOpen(false);
                 }}
               >
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <UserPlus className="w-6 h-6 text-purple-600" />
+                <div className="bg-purple-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-purple-200">
+                  <UserPlus className="w-6 h-6 text-purple-600 transition-all duration-200 group-hover:scale-110" />
                 </div>
                 <div className="text-left flex-1">
                   <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">Add Faculty</h3>
@@ -312,10 +312,10 @@ function HodDashboard() {
             {/* View Faculty */}
             <button
               onClick={() => setViewType((prev) => (prev === "faculty" ? null : "faculty"))}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4"
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
             >
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Eye className="w-6 h-6 text-purple-600" />
+              <div className="bg-purple-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-purple-200">
+                <Eye className="w-6 h-6 text-purple-600 transition-all duration-200 group-hover:scale-110" />
               </div>
               <div className="text-left">
                 <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">View Faculty</h3>
@@ -326,15 +326,15 @@ function HodDashboard() {
             {/* Subject Actions */}
             <div className="relative" ref={subjectDropdownRef}>
               <button
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full"
+                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 w-full cursor-pointer group"
                 onClick={() => {
                   setIsSubjectOpen(!isSubjectOpen);
                   setIsStudentOpen(false);
                   setIsFacultyOpen(false);
                 }}
               >
-                <div className="bg-amber-100 p-3 rounded-lg">
-                  <FileSpreadsheet className="w-6 h-6 text-amber-600" />
+                <div className="bg-amber-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-amber-200">
+                  <FileSpreadsheet className="w-6 h-6 text-amber-600 transition-all duration-200 group-hover:scale-110" />
                 </div>
                 <div className="text-left flex-1">
                   <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">Add Subject</h3>
@@ -371,10 +371,10 @@ function HodDashboard() {
             {/* View Subjects */}
             <button
               onClick={() => setViewType((prev) => (prev === "subjects" ? null : "subjects"))}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4"
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
             >
-              <div className="bg-amber-100 p-3 rounded-lg cursor-pointer">
-                <Eye className="w-6 h-6 text-amber-600" />
+              <div className="bg-amber-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-amber-200">
+                <Eye className="w-6 h-6 text-amber-600 transition-all duration-200 group-hover:scale-110" />
               </div>
               <div className="text-left ">
                 <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">View Subjects</h3>

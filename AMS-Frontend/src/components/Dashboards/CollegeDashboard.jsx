@@ -12,7 +12,8 @@ import {
   ChevronDown,
   School,
   UserCheck,
-  UserX
+  UserX,
+  FolderOpen
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
@@ -77,7 +78,8 @@ export default function CollegeDashboard() {
   }, []);
 
   const handleNoRecords = (type) => {
-    toast.error(`No ${type === "faculty" ? "faculty" : "students"} found. Please add ${type === "faculty" ? "faculty" : "students"} first.`);
+    const typeText = type === "faculty" ? "faculty" : type === "department" ? "departments" : "students";
+    toast.error(`No ${typeText} found. Please add ${typeText} first.`);
   };
 
   const handleFileUpload = async (event, type) => {
@@ -249,8 +251,8 @@ export default function CollegeDashboard() {
                 }}
                 title={!hasCourses ? "Please add courses first" : ""}
               >
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <UserPlus className="w-6 h-6 text-purple-600" />
+                <div className="bg-purple-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-purple-200 ">
+                  <UserPlus className="w-6 h-6 text-purple-600 transition-all duration-200 group-hover:scale-110" />
                 </div>
                 <div className="text-left flex-1">
                   <h3 className="text-lg font-semibold text-gray-800">Add HOD</h3>
@@ -286,13 +288,13 @@ export default function CollegeDashboard() {
               )}
             </div>
 
-            {/* View Faculty */}
+            {/* View Hod */}
             <button
               onClick={() => setViewType((prev) => (prev === "faculty" ? null : "faculty"))}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer"
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
             >
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Eye className="w-6 h-6 text-purple-600" />
+              <div className="bg-purple-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-purple-200">
+                <Eye className="w-6 h-6 text-purple-600 transition-all duration-200 group-hover:scale-110" />
               </div>
               <div className="text-left">
                 <h3 className="text-lg font-semibold text-gray-800">View HOD</h3>
@@ -303,10 +305,10 @@ export default function CollegeDashboard() {
             {/* Course & Department */}
             <button
               onClick={() => navigate('/courseDepartment')}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer"
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
             >
-              <div className="bg-amber-100 p-3 rounded-lg">
-                <BookOpen className="w-6 h-6 text-amber-600" />
+              <div className="bg-amber-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-amber-200">
+                <BookOpen className="w-6 h-6 text-amber-600 transition-all duration-200 group-hover:scale-110" />
               </div>
               <div className="text-left">
                 <h3 className="text-lg font-semibold text-gray-800">Course & Dept</h3>
@@ -314,7 +316,19 @@ export default function CollegeDashboard() {
               </div>
             </button>
 
-            
+            {/* View Course Department */}
+            <button
+              onClick={() => setViewType((prev) => (prev === "courseDepartment" ? null : "courseDepartment"))}
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
+            >
+              <div className="bg-amber-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-amber-200">
+                <FolderOpen className="w-6 h-6 text-amber-600 transition-all duration-200 group-hover:scale-110" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-semibold text-gray-800">View Courses & Departments</h3>
+                <p className="text-sm text-gray-600">Browse all courses & departments</p>
+              </div>
+            </button>
           </div>
 
           {/* View Section */}

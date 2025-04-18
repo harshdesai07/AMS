@@ -63,6 +63,7 @@ function FacultyLogin() {
           localStorage.setItem('hodToken', data.token);
           localStorage.setItem('hodCourse', data.course);
           localStorage.setItem('hodDepartment', data.department)
+          localStorage.setItem('hodCollegeId', data.collegeId)
         }
         else {
           localStorage.setItem('facultyToken', data.token);

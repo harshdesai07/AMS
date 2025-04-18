@@ -118,23 +118,19 @@ public class StudentEnrollmentService {
 
 		ser.save(se);
 		
-//	     this code sends the email by calling email service methods
-			es.sendStudentPersonalDetailsConfirmation(student.getStudentEmail(),
+//	     this code sends the email by calling email service methods sends personal detail and credential to student email
+
+			es.sendStudentDetailsAndCredentials(student.getStudentEmail(),
 					student.getStudentName(),
 					student.getStudentNumber(),
 					student.getStudentParentsNumber(),
 					se.getCollegeCourseDepartment().getDepartment().getName(),
 					se.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName(),
 					se.getSemesterMetadata().getSemesterNumber(),
-					college.getCollegeName(),
-					college.getEmail(),
-					"📋 Please Confirm Your Personal Details");
-			es.sendLoginCredentials(student.getStudentEmail(),
-					student.getStudentName(),
 					rawPassword,
 					college.getCollegeName(),
 					college.getEmail(),
-					"🔐 Your Login Credentials");
+					"📋 Please Confirm Your Personal Details And 🔐 Your Login Credentials");
 	}
 
 //	this function is use to update the student 
@@ -184,7 +180,7 @@ public class StudentEnrollmentService {
 		ser.save(studentEnrollment);
 		
 //	     this code sends the email by calling email service methods
-			es.sendStudentPersonalDetailsConfirmation(student.getStudentEmail(),
+			es.sendUpdatedStudentInformation(student.getStudentEmail(),
 					student.getStudentName(),
 					student.getStudentNumber(),
 					student.getStudentParentsNumber(),
@@ -317,24 +313,19 @@ public class StudentEnrollmentService {
 
 			ser.save(se);
 			
-//		     this code sends the email by calling email service methods
-				es.sendStudentPersonalDetailsConfirmation(student.getStudentEmail(),
+//		     this code sends the email by calling email service methods sends personal detail and credential to student email
+
+				es.sendStudentDetailsAndCredentials(student.getStudentEmail(),
 						student.getStudentName(),
 						student.getStudentNumber(),
 						student.getStudentParentsNumber(),
 						se.getCollegeCourseDepartment().getDepartment().getName(),
 						se.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName(),
 						se.getSemesterMetadata().getSemesterNumber(),
-						college.getCollegeName(),
-						college.getEmail(),
-						"📋 Please Confirm Your Personal Details");
-				es.sendLoginCredentials(student.getStudentEmail(),
-						student.getStudentName(),
 						rawPassword,
 						college.getCollegeName(),
 						college.getEmail(),
-						"🔐 Your Login Credentials");
-
+						"📋 Please Confirm Your Personal Details And 🔐 Your Login Credentials");
 		}
 	}
 

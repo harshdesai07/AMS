@@ -57,6 +57,7 @@ export default function CollegeLogin() {
       toast.dismiss(loadingToast);
 
       if (response.ok) {
+        console.log(data.token)
         // Store the JWT token
         localStorage.setItem('collegeToken', data.token);
         localStorage.setItem('collegeName', data.collegeName);
