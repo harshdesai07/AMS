@@ -50,7 +50,6 @@ public class AuthController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             String jwt = jwtUtil.generateToken(userDetails, userDetails.getRole());
             
-            
             // Create response DTO
             LoginResponseDto response = new LoginResponseDto();
             response.setEmail(userDetails.getUsername());
@@ -68,6 +67,10 @@ public class AuthController {
                 case "FACULTY":
                     Faculty faculty = userDetailsService.getFacultyDetails(userDetails.getUsername());
                     response.setDesignation(faculty.getFacultyDesignation());
+                    response.setId(faculty.getFacultyId());
+                    response.setDepartment(faculty.getCollegeCourseDepartment().getDepartment().getName());
+                    response.setCourse(faculty.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName());
+                    response.setCollegeId(faculty.getCollegeCourseDepartment().getCollegeCourse().getCollege().getCollegeId());
                     break;
                 case "STUDENT":
                     // No additional details needed for student
@@ -78,6 +81,7 @@ public class AuthController {
                 	 response.setCourse(hod.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName());
                 	 response.setDepartment(hod.getCollegeCourseDepartment().getDepartment().getName());
                 	 response.setCollegeId(hod.getCollegeCourseDepartment().getCollegeCourse().getCollege().getCollegeId());
+                	 response.setId(hod.getFacultyId());
                 	 break;     	
                 default:
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)

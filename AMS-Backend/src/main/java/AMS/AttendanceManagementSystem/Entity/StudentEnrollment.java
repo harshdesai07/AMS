@@ -26,6 +26,7 @@ public class StudentEnrollment {
     @JoinColumn(name = "semester_metadata_id", nullable = false)
     private Semester semester;
     
+    private String rollNumber;
 
     public Long getId() {
 		return id;
@@ -51,13 +52,19 @@ public class StudentEnrollment {
 		this.collegeCourseDepartment = collegeCourseDepartment;
 	}
 
-	public Semester getSemesterMetadata() {
+	public Semester getSemester() {
 		return semester;
 	}
 
-	public void setSemesterMetadata(Semester semester) {
+	public void setSemester(Semester semester) {
 		this.semester = semester;
 	}
 
-    
+	public String getRollNumber() {
+		return rollNumber;
+	}
+
+	public void setRollNumber(String rollNumber) {
+		this.rollNumber = rollNumber;
+	}
 }

@@ -1,5 +1,5 @@
-import { Building2, GraduationCap, Lock, Mail, School, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { Building2, GraduationCap, Lock, Mail, School, ArrowRight, Eye, EyeOff, Key, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import collegeList from "../data/collegeList";
@@ -19,9 +19,40 @@ export default function CollegeRegistration() {
   const [errors, setErrors] = useState({});
   const [filteredColleges, setFilteredColleges] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClose = () => {
     navigate(-1);  // this takes you back to the previous page
+  };
+
+  useEffect(() => {
+    if (formData.password) {
+      let strength = 0;
+      if (formData.password.length >= 8) strength += 25;
+      if (/[A-Z]/.test(formData.password)) strength += 25;
+      if (/[0-9]/.test(formData.password)) strength += 25;
+      if (/[^A-Za-z0-9]/.test(formData.password)) strength += 25;
+      setPasswordStrength(strength);
+    } else {
+      setPasswordStrength(0);
+    }
+  }, [formData.password]);
+
+  const getStrengthColor = () => {
+    if (passwordStrength <= 25) return 'bg-red-500';
+    if (passwordStrength <= 50) return 'bg-orange-500';
+    if (passwordStrength <= 75) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  const getStrengthText = () => {
+    if (passwordStrength <= 25) return 'Weak';
+    if (passwordStrength <= 50) return 'Fair';
+    if (passwordStrength <= 75) return 'Good';
+    return 'Strong';
   };
 
   const handleChange = (e) => {
@@ -100,6 +131,7 @@ export default function CollegeRegistration() {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
     const loadingToast = toast.loading("Registering...");
 
     try {
@@ -119,8 +151,8 @@ export default function CollegeRegistration() {
       } else if (response.status === 409) {
         if (responseData.message.includes("College already exists")) {
           toast.error("This college name is already registered");
-        } else if (responseData.message.includes("Email already exists")) {
-          toast.error("This email is already registered");
+        } else if (responseData.message.includes("Email already exists.")) {
+          toast.error("This email is already registered. Please SignIn");
         } else {
           toast.error("A duplicate entry exists");
         }
@@ -131,6 +163,8 @@ export default function CollegeRegistration() {
       toast.dismiss(loadingToast);
       toast.error("Network error. Please try again");
       console.error("Network Error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -245,15 +279,47 @@ export default function CollegeRegistration() {
                   </label>
                   <div className="relative">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
+                      className="w-full pl-10 sm:pl-12 pr-10 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
                       placeholder="••••••••"
                     />
                     <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-600 transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
+                      ) : (
+                        <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                      )}
+                    </button>
                   </div>
+                  {formData.password && (
+                    <div className="mt-2 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-gray-500">Password Strength</span>
+                        <span className={`text-xs font-medium ${passwordStrength <= 25 ? 'text-red-600' :
+                            passwordStrength <= 50 ? 'text-orange-600' :
+                              passwordStrength <= 75 ? 'text-yellow-600' :
+                                'text-green-600'
+                          }`}>
+                          {getStrengthText()}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          style={{ width: `${passwordStrength}%` }}
+                          className={`h-full transition-all duration-300 ${getStrengthColor()}`}
+                        />
+                      </div>
+                    </div>
+                  )}
                   {errors.password && (
                     <p className="text-red-600 text-xs sm:text-sm mt-1">{errors.password}</p>
                   )}
@@ -265,14 +331,26 @@ export default function CollegeRegistration() {
                   </label>
                   <div className="relative">
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
+                      className="w-full pl-10 sm:pl-12 pr-10 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm sm:text-base"
                       placeholder="••••••••"
                     />
-                    <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                    <Shield className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-600 transition-colors"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
+                      ) : (
+                        <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                      )}
+                    </button>
                   </div>
                   {errors.confirmPassword && (
                     <p className="text-red-600 text-xs sm:text-sm mt-1">{errors.confirmPassword}</p>
@@ -283,10 +361,20 @@ export default function CollegeRegistration() {
               {/* Submit Button */}
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center group text-sm sm:text-lg mt-6 sm:mt-8"
               >
-                Complete Registration
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" />
+                {isSubmitting ? (
+                  <>
+                    <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                    Registering...
+                  </>
+                ) : (
+                  <>
+                    Complete Registration
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" />
+                  </>
+                )}
               </button>
             </form>
           </div>
@@ -295,7 +383,7 @@ export default function CollegeRegistration() {
         {/* Footer Text */}
         <p className="text-center mt-4 sm:mt-6 text-gray-600 text-xs sm:text-sm">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
+          <a href="/collegeLogin" className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
             Sign in here
           </a>
         </p>

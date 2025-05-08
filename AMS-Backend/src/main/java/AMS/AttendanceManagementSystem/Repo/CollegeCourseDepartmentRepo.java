@@ -18,11 +18,11 @@ public interface CollegeCourseDepartmentRepo extends JpaRepository<CollegeCourse
 	 @Query("SELECT DISTINCT c.department FROM CollegeCourseDepartment c " +
 	           "WHERE c.collegeCourse.college.id = :collegeId " +
 	           "AND c.collegeCourse.course.name = :courseName")
-	    List<Department> findDepartmentsByCourseNameAndCollegeId(String courseName, Integer collegeId);
+	    List<Department> findDepartmentsByCourseNameAndCollegeId(String courseName, Long collegeId);
 	    
 	 @Query("SELECT DISTINCT ccd.collegeCourse.course.name, ccd.department.name " +
 	           "FROM CollegeCourseDepartment ccd " +
 	           "WHERE ccd.collegeCourse.college.collegeId = :collegeId " +
 	           "ORDER BY ccd.collegeCourse.course.name, ccd.department.name")
-	    List<Object[]> findCoursesAndDepartmentsByCollegeId(Integer collegeId);
+	    List<Object[]> findCoursesAndDepartmentsByCollegeId(Long collegeId);
 }

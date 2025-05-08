@@ -67,7 +67,7 @@ public class FacultyService implements UserDetailsService {
 
 	// saves the faculty from registration form
 	@Transactional
-	public void saveFaculty(FacultyDto fdt, Integer collegeId) {
+	public void saveFaculty(FacultyDto fdt, Long collegeId) {
 
 		// generate and hash the password
 		String rawPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
@@ -114,8 +114,8 @@ public class FacultyService implements UserDetailsService {
 				faculty.getFacultyDesignation(),
 				collegeCourseDepartment.getCollegeCourse().getCourse().getName(),
 				collegeCourseDepartment.getDepartment().getName(),
-				collegeCourseDepartment.getCollegeCourse().getCollege().getCollegeName(),
 				rawPassword,
+				collegeCourseDepartment.getCollegeCourse().getCollege().getCollegeName(),
 				collegeCourseDepartment.getCollegeCourse().getCollege().getEmail(),
 				"📋 Respected Faculty Please Confirm Your Personal Details And Check 🔐 Your Login Credentials");
 	
@@ -139,7 +139,7 @@ public class FacultyService implements UserDetailsService {
 	}
 
 //	this function is uses to find or get all faculty data from database based on source
-	public List<Faculty> retriveFaculty(Integer id, String source, String courseName, String departmentName) {
+	public List<Faculty> retriveFaculty(Long id, String source, String courseName, String departmentName) {
 		
 		if(source.equals("COLLEGE")) {
 			return fr.findAllHodsByCollegeId(id);
@@ -218,7 +218,7 @@ public class FacultyService implements UserDetailsService {
 
 	// save the faculty data from excel
 	@Transactional
-	public void saveFacultyFromExcel(MultipartFile file, Integer collegeId) {
+	public void saveFacultyFromExcel(MultipartFile file, Long collegeId) {
 
 		// generate and hash the password
 		String rawPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
@@ -270,8 +270,8 @@ public class FacultyService implements UserDetailsService {
 					faculty.getFacultyDesignation(),
 					collegeCourseDepartment.getCollegeCourse().getCourse().getName(),
 					collegeCourseDepartment.getDepartment().getName(),
-					collegeCourseDepartment.getCollegeCourse().getCollege().getCollegeName(),
 					rawPassword,
+					collegeCourseDepartment.getCollegeCourse().getCollege().getCollegeName(),
 					collegeCourseDepartment.getCollegeCourse().getCollege().getEmail(),
 					"📋 Respected Faculty Please Confirm Your Personal Details And Check 🔐 Your Login Credentials");
 		}

@@ -21,7 +21,7 @@ public class CollegeCourseController {
 	
 	//get the list of courses offered by college
 	@GetMapping("/courses/{collegeId}")
-	public ResponseEntity<?> getCourseByCollegeId(@PathVariable Integer collegeId) {
+	public ResponseEntity<?> getCourseByCollegeId(@PathVariable Long collegeId) {
 	    List<Course> courses = ccs.findCourseByCollegeId(collegeId);
 
 	    if (courses.isEmpty()) {

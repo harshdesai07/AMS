@@ -18,10 +18,7 @@ public interface CollegeCourseDepartmentSemesterSubjectRepo extends JpaRepositor
 		        CollegeCourseDepartment collegeCourseDepartment,
 		        Semester semesterMetadata,
 		        Subject subject
-		    );
-	   
-	   Optional<CollegeCourseDepartmentSemesterSubject> findBySemesterAndSubject(Semester semester, Subject subject);
-	   
+		    );   
 
 	   @Query("SELECT c.semester.semesterNumber, c.subject.name " +  
 		       "FROM CollegeCourseDepartmentSemesterSubject c " +
@@ -30,7 +27,7 @@ public interface CollegeCourseDepartmentSemesterSubjectRepo extends JpaRepositor
 		       "AND c.collegeCourseDepartment.department.name = :departmentName " +
 		       "ORDER BY c.semester.semesterNumber")
 		List<Object[]> findSemesterSubjectsByCollegeCourseAndDepartment(
-		         Integer collegeId,
+		         Long collegeId,
 		         String courseName,
 		         String departmentName);
 }

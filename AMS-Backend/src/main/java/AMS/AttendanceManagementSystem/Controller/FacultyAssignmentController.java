@@ -1,17 +1,21 @@
 package AMS.AttendanceManagementSystem.Controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import AMS.AttendanceManagementSystem.Dto.FacultyAssignmentDto;
+import AMS.AttendanceManagementSystem.Entity.Subject;
 import AMS.AttendanceManagementSystem.Service.FacultyAssignmentService;
 
 @RestController
@@ -36,6 +40,13 @@ public class FacultyAssignmentController {
 			res.put("error", "Subject Assign To Faculty Failed.");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
 		}
+	}
+	
+	@GetMapping("/subjectsByFaculty")
+	public ResponseEntity<?> getAllSubjectsTaughtByFaculty(@RequestParam Long facultyId, @RequestParam String courseName, @RequestParam String departmentName, @RequestParam String semester){
+		List<Subject> subjects = fas.subjectsTaughtByAFaculty(facultyId, courseName, departmentName, semester);
+		
+		return ResponseEntity.ok(subjects);
 	}
 	
 }

@@ -48,7 +48,7 @@ public class CollegeCourseDepartmentService {
 	
 	//save the course and department offered by college
 	@Transactional
-	public String saveCollegeCourseDept(Integer collegeId, String courseName, List<String> depts) {
+	public String saveCollegeCourseDept(Long collegeId, String courseName, List<String> depts) {
 	    // 1. Check if college exists
 	    Optional<College> oc = cr.findById(collegeId);
 	    if (oc.isEmpty()) return "College not found.";
@@ -125,14 +125,14 @@ public class CollegeCourseDepartmentService {
 	}
 	
 //	this function is made to get All department of particular course and college
-public List<Department> findDepartment(Integer collegeId, String CourseName) {
+public List<Department> findDepartment(Long collegeId, String CourseName) {
 	
 	return ccdr.findDepartmentsByCourseNameAndCollegeId(CourseName, collegeId);
 	
 }
 
 //finds the course and its department for a particular college
-public List<CollegeCourseDepartmentDto> findAllCoursesAndDepartmentsForCollege(Integer collegeId){
+public List<CollegeCourseDepartmentDto> findAllCoursesAndDepartmentsForCollege(Long collegeId){
 	
 	//1. fetch all the courses and department offered by college
 	List<Object[]> rawResults = ccdr.findCoursesAndDepartmentsByCollegeId(collegeId);

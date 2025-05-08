@@ -9,7 +9,7 @@ import AMS.AttendanceManagementSystem.Entity.College;
 
 
 @Repository
-public interface CollegeRepo extends JpaRepository<College,Integer>   {
+public interface CollegeRepo extends JpaRepository<College,Long>   {
 	Optional<College> findByEmail(String email);
 	Optional<College> findByCollegeName(String collegeName);
 	College findByEmailAndPassword(String collegeEmail, String password);

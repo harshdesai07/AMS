@@ -32,7 +32,7 @@ public class FacultyController {
 	
 //	faculty register api
 	 @PostMapping("/facultyregister/{collegeId}")
-	    public  ResponseEntity<String> addFaculty(@RequestBody FacultyDto fdt, @PathVariable Integer collegeId) {
+	    public  ResponseEntity<String> addFaculty(@RequestBody FacultyDto fdt, @PathVariable Long collegeId) {
 		 try {
 		    	frs.saveFaculty(fdt, collegeId);
 		        return new ResponseEntity<>("Faculty registration successful!", HttpStatus.CREATED);
@@ -44,7 +44,7 @@ public class FacultyController {
 	
 //	 api to get faculty whole data
 	 @GetMapping("/getfaculty/{id}/{source}")
-	 public List<Faculty> fetchFaculty(@PathVariable Integer id, @PathVariable String source, @RequestParam String courseName, 
+	 public List<Faculty> fetchFaculty(@PathVariable Long id, @PathVariable String source, @RequestParam String courseName, 
 		        @RequestParam String departmentName){
 		 return frs.retriveFaculty(id,source,courseName,departmentName);
 	 } 
@@ -82,7 +82,7 @@ public class FacultyController {
 	 
 	 @PostMapping("/uploadFacultyExcel/{collegeId}")
 	 public ResponseEntity<Map<String, String>> uploadFacultyExcel(@RequestParam MultipartFile file,
-	                                                               @PathVariable Integer collegeId) {
+	                                                               @PathVariable Long collegeId) {
 	     Map<String, String> response = new HashMap<>();
 
 	     try {

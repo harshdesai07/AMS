@@ -3,6 +3,7 @@ package AMS.AttendanceManagementSystem.Controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import AMS.AttendanceManagementSystem.Dto.SubjectDto;
 import AMS.AttendanceManagementSystem.Service.CollegeCourseDepartmentSemesterSubjectService;
+
 
 @RestController
 @CrossOrigin("*")
@@ -71,17 +73,16 @@ public class CollegeCourseDepartmentSemesterSubjectController {
     
     //get the list of subjects semester wise of a department of a particular college
     @GetMapping("/getSubjectsSemesterwise/{collegeId}")
-    public ResponseEntity<?> geAllSubjectsBySemester(@PathVariable Integer collegeId, @RequestParam String courseName, @RequestParam String departmentName){
+    public ResponseEntity<?> geAllSubjectsBySemester(@PathVariable Long collegeId, @RequestParam String courseName, @RequestParam String departmentName){
     	HashMap<String, String> response = new HashMap<>();
     	
     	try {
     		List<SubjectDto> dto = ccdsss.findAllSubjectsBySemester(collegeId, courseName, departmentName);
         	
-        	if(dto.isEmpty()) {
-        		response.put("error", "Unable to find subjects");
-        		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
-        	}
-        	
+    		// Return empty list if no subjects found
+            if (dto.isEmpty()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
         	return ResponseEntity.ok(dto);
     	} catch(Exception e) {
     		response.put("error", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred");

@@ -298,7 +298,7 @@ export default function hodRegistration() {
                     value={formData.facultyName}
                     onChange={(e) => handleChange(e.target.value, "facultyName")}
                     className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
-                    placeholder="Enter faculty name"
+                    placeholder="Enter HOD name"
                   />
                   <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
@@ -319,7 +319,7 @@ export default function hodRegistration() {
                     value={formData.facultyEmail}
                     onChange={(e) => handleChange(e.target.value, "facultyEmail")}
                     className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
-                    placeholder="faculty@email.com"
+                    placeholder="hod@email.com"
                   />
                   <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>

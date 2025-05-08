@@ -30,7 +30,7 @@ public class StudentEnrollmentController {
 	
 	//add student details --> student table and studentEnrollement
 	@PostMapping("/studentregister/{collegeId}")
-	public ResponseEntity<String> addStudentDetails(@RequestBody StudentDto sd,@PathVariable Integer collegeId) {
+	public ResponseEntity<String> addStudentDetails(@RequestBody StudentDto sd,@PathVariable Long collegeId) {
 	    try {
 	    	ses.saveStudentDetails(sd,collegeId);
 	        return new ResponseEntity<>("Student registration successful!", HttpStatus.CREATED);
@@ -70,10 +70,10 @@ public class StudentEnrollmentController {
 		}
 		
 //		get student data
-		@GetMapping("/getstudent/{collegeId}")
-		public ResponseEntity<?> getStudents(@PathVariable Integer collegeId, @RequestParam String courseName, @RequestParam String departmentName){
+		@GetMapping("/getstudent/{collegeId}/{source}")
+		public ResponseEntity<?> getStudents(@PathVariable Long collegeId, @PathVariable String source, @RequestParam String courseName, @RequestParam String departmentName, @RequestParam(required = false) String semester){
 			
-			List<GetStudentDto> al=ses.findStudents(collegeId, courseName, departmentName);
+			List<GetStudentDto> al=ses.findStudents(collegeId, courseName, departmentName,semester,source);
 			Map<String,String> res=new HashMap<>();
 			res.put("error","No student found");
 			
@@ -83,11 +83,10 @@ public class StudentEnrollmentController {
 			
 		}
 		
-		
 		//save student data from excel
 		@PostMapping("/uploadStudentExcel/{collegeId}")
 		public ResponseEntity<Map<String, String>> uploadStudentExcel(@RequestParam MultipartFile file,
-				@PathVariable Integer collegeId) {
+				@PathVariable Long collegeId) {
 			Map<String, String> response = new HashMap<>();
 
 			try {

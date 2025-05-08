@@ -1,28 +1,23 @@
 import axios from 'axios';
-import { 
-  Calendar, 
-  Eye, 
-  Menu, 
-  Upload, 
-  Users, 
-  X, 
+import {
+  Eye,
+  Upload,
   BookOpen,
   GraduationCap,
   UserPlus,
   ChevronDown,
   School,
-  UserCheck,
-  UserX,
-  FolderOpen
+  FolderOpen,
+  Layers,
+  Award
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import CollegeDataTable from "../data/CollegeDataTable";
-import LogoutButton from "../ui/LogoutButton";
+import AccountDropdown from '../ui/AccountDropdown';
 
 export default function CollegeDashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const [viewType, setViewType] = useState(null);
   const collegeId = localStorage.getItem("collegeId");
@@ -32,6 +27,47 @@ export default function CollegeDashboard() {
   const [hasCourses, setHasCourses] = useState(false);
   const [courses, setCourses] = useState([]);
   const facultyDropdownRef = useRef(null);
+  const [stats, setStats] = useState({
+    totalDepartments: 0,
+    totalHods: 0,
+    totalCourses: 0,
+    accreditedPrograms: 0
+  });
+
+  useEffect(() => {
+    const fetchCollegeData = async () => {
+      try {
+        // Fetch college statistics
+        const [departmentsRes, hodsRes, coursesRes] = await Promise.all([
+          axios.get(`http://localhost:8080/departments/count/${collegeId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`http://localhost:8080/hods/count/${collegeId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`http://localhost:8080/courses/${collegeId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+
+        setStats({
+          totalDepartments: departmentsRes.data.count || 0,
+          totalHods: hodsRes.data.count || 0,
+          totalCourses: coursesRes.data?.length || 0,
+          accreditedPrograms: coursesRes.data?.filter(c => c.accredited)?.length || 0
+        });
+
+        if (coursesRes.data?.length > 0) {
+          setCourses(coursesRes.data);
+          setHasCourses(true);
+        }
+      } catch (error) {
+        console.error('Error fetching college data:', error);
+      }
+    };
+
+    fetchCollegeData();
+  }, [collegeId, token]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -78,7 +114,7 @@ export default function CollegeDashboard() {
   }, []);
 
   const handleNoRecords = (type) => {
-    const typeText = type === "faculty" ? "faculty" : type === "department" ? "departments" : "students";
+    const typeText = type === "faculty" ? "HOD" : "Course & Department";
     toast.error(`No ${typeText} found. Please add ${typeText} first.`);
   };
 
@@ -113,7 +149,7 @@ export default function CollegeDashboard() {
           endpoint,
           formData,
           {
-            headers: { 
+            headers: {
               'Content-Type': 'multipart/form-data',
               Authorization: `Bearer ${token}`,
             },
@@ -143,7 +179,7 @@ export default function CollegeDashboard() {
       return;
     }
     navigate(path, {
-      state: { 
+      state: {
         userRole: "COLLEGE",
         courses: courses
       }
@@ -153,88 +189,61 @@ export default function CollegeDashboard() {
   return (
     <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
       <Toaster position="top-center" />
-      
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-56 bg-white shadow-lg transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-64`}
-      >
-        <div className="flex justify-between items-center p-6">
-          <div className="flex items-center space-x-3">
-            <School className="w-8 h-8 text-blue-600" />
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">{collegeName}</h2>
-              <p className="text-sm text-gray-600">College Dashboard</p>
-            </div>
-          </div>
-          <button
-            className="md:hidden text-gray-600 hover:bg-gray-100 p-2 rounded-lg cursor-pointer"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <nav className="p-4 space-y-2">
-          <button className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 cursor-pointer">
-            <GraduationCap className="w-5 h-5" />
-            <span>Dashboard</span>
-          </button>
-          <button className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 cursor-pointer">
-            <Users className="w-5 h-5" />
-            <span>Faculty</span>
-          </button>
-          <button className="flex items-center space-x-3 p-3 w-full rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 cursor-pointer">
-            <Calendar className="w-5 h-5" />
-            <span>Attendance</span>
-          </button>
-        </nav>
-      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-auto">
         {/* Top Navigation */}
         <header className="bg-white shadow-sm p-4 sticky top-0 z-40">
           <div className="flex items-center justify-between">
-            <button
-              className="md:hidden text-gray-600 hover:bg-gray-100 p-2 rounded-lg cursor-pointer"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <h2 className="text-xl font-bold text-gray-800">College Dashboard</h2>
-            <LogoutButton className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer" />
+            <div className="flex items-center space-x-3">
+              <School className="w-6 h-6 text-blue-600" />
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">{collegeName}</h2>
+                <p className="text-sm text-gray-600">College Dashboard</p>
+              </div>
+            </div>
+
+            <AccountDropdown userRole='COLLEGE' />
           </div>
         </header>
 
         {/* Main Dashboard Content */}
         <main className="p-6 space-y-6">
-          {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Stats Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              {/* Total HODs Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-800">Total Students</h3>
-                <Users className="w-6 h-6 text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-800">HODs</h3>
+                <GraduationCap className="w-6 h-6 text-blue-600" />
               </div>
-              <p className="text-3xl font-bold text-blue-600">1,200</p>
-              <p className="text-sm text-gray-600 mt-2">↑ 12% from last month</p>
+              <p className="text-3xl font-bold text-blue-600">{stats.totalHods}</p>
+              <p className="text-sm text-gray-600 mt-2">Heads of Departments</p>
             </div>
+
+           
+
+            
+
+            {/* Total Courses Card */}
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-800">Present Today</h3>
-                <UserCheck className="w-6 h-6 text-green-600" />
+                <h3 className="text-lg font-semibold text-gray-800">Courses</h3>
+                <BookOpen className="w-6 h-6 text-orange-600" />
               </div>
-              <p className="text-3xl font-bold text-green-600">950</p>
-              <p className="text-sm text-gray-600 mt-2">79.2% attendance rate</p>
+              <p className="text-3xl font-bold text-orange-600">{stats.totalCourses}</p>
+              <p className="text-sm text-gray-600 mt-2">Offered programs</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+
+             {/* Total Departments Card */}
+             <div className="bg-white p-6 rounded-xl shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-800">Absent Today</h3>
-                <UserX className="w-6 h-6 text-red-600" />
+                <h3 className="text-lg font-semibold text-gray-800">Departments</h3>
+                <Layers className="w-6 h-6 text-indigo-600" />
               </div>
-              <p className="text-3xl font-bold text-red-600">250</p>
-              <p className="text-sm text-gray-600 mt-2">20.8% absence rate</p>
+              <p className="text-3xl font-bold text-indigo-600">{stats.totalDepartments}</p>
+              <p className="text-sm text-gray-600 mt-2">Total academic departments</p>
             </div>
           </div>
 
@@ -288,6 +297,20 @@ export default function CollegeDashboard() {
               )}
             </div>
 
+            {/* Course & Department */}
+            <button
+              onClick={() => navigate('/courseDepartment')}
+              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
+            >
+              <div className="bg-amber-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-amber-200">
+                <BookOpen className="w-6 h-6 text-amber-600 transition-all duration-200 group-hover:scale-110" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-semibold text-gray-800">Course & Dept</h3>
+                <p className="text-sm text-gray-600">Manage departments</p>
+              </div>
+            </button>
+
             {/* View Hod */}
             <button
               onClick={() => setViewType((prev) => (prev === "faculty" ? null : "faculty"))}
@@ -302,19 +325,7 @@ export default function CollegeDashboard() {
               </div>
             </button>
 
-            {/* Course & Department */}
-            <button
-              onClick={() => navigate('/courseDepartment')}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center space-x-4 cursor-pointer group"
-            >
-              <div className="bg-amber-100 p-3 rounded-lg transition-all duration-200 group-hover:bg-amber-200">
-                <BookOpen className="w-6 h-6 text-amber-600 transition-all duration-200 group-hover:scale-110" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold text-gray-800">Course & Dept</h3>
-                <p className="text-sm text-gray-600">Manage departments</p>
-              </div>
-            </button>
+            
 
             {/* View Course Department */}
             <button

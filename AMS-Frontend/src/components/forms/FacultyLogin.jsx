@@ -1,4 +1,4 @@
-import { ArrowRight, Users, Lock, Mail } from 'lucide-react';
+import { ArrowRight, Users, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ function FacultyLogin() {
   const [email, setEmail] = useState('');
   const [facultyPassword, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -28,6 +29,10 @@ function FacultyLogin() {
     } else {
       setEmailError('');
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (e) => {
@@ -52,11 +57,10 @@ function FacultyLogin() {
         }),
       });
 
-
-
       const data = await response.json();
       toast.dismiss(loadingToast);
 
+      console.log(data)
       if (response.ok) {
         console.log(data.token)
         if (data.designation === 'HOD') {
@@ -64,13 +68,15 @@ function FacultyLogin() {
           localStorage.setItem('hodCourse', data.course);
           localStorage.setItem('hodDepartment', data.department)
           localStorage.setItem('hodCollegeId', data.collegeId)
+          localStorage.setItem('hodId', data.id);
         }
         else {
           localStorage.setItem('facultyToken', data.token);
-          localStorage.setItem('facultyEmail', email);
-          if (data.facultyId) {
-            localStorage.setItem('facultyId', data.facultyId);
-          }
+          localStorage.setItem('facultyId', data.id);
+          localStorage.setItem('facultyDepartment', data.department);
+          localStorage.setItem('facultyCourse', data.course);
+          localStorage.setItem('facultyCollegeId', data.collegeId);
+          console.log(data.id)
         }
 
         toast.success('Login successful!');
@@ -81,7 +87,7 @@ function FacultyLogin() {
           navigate('/facultyDashboard');
         }
       } else {
-        toast.error(data.error || 'Invalid credentials');
+        toast.error('Invalid credentials');
       }
     } catch (err) {
       toast.dismiss(loadingToast);
@@ -144,14 +150,25 @@ function FacultyLogin() {
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={facultyPassword}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
+                    className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none"
                     placeholder="••••••••"
                     required
                   />
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
               </div>
 

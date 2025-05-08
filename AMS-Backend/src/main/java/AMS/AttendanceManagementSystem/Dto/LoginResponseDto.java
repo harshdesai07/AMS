@@ -5,11 +5,18 @@ public class LoginResponseDto {
     private String role;
     private String email;
     private String collegeName;
-    private Integer collegeId;
+    private Long collegeId;
     private String designation;
     private String course;
     private String department;
+    private Long id;
     
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getCourse() {
 		return course;
 	}
@@ -22,10 +29,10 @@ public class LoginResponseDto {
 	public void setDepartment(String department) {
 		this.department = department;
 	}
-	public Integer getCollegeId() {
+	public Long getCollegeId() {
 		return collegeId;
 	}
-	public void setCollegeId(Integer collegeId) {
+	public void setCollegeId(Long collegeId) {
 		this.collegeId = collegeId;
 	}
 	public String getDesignation() {

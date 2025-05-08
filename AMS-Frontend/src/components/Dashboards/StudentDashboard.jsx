@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, Calendar, Users, X } from "lucide-react";
 import { Card, CardContent } from "../ui/Card";
 import { Button } from "../ui/Button";
-import LogoutButton from "../ui/LogoutButton";
+import AccountDropdown from "../ui/AccountDropdown";
 
 // Mocked Logged-in Student Data (Replace with API call)
 const loggedInStudent = {
@@ -100,7 +100,7 @@ export default function StudentDashboard() {
             <Menu />
           </Button>
           <h2 className="text-lg font-semibold">Dashboard</h2>
-          <LogoutButton />
+          <AccountDropdown />
         </div>
 
         {/* Student Information */}

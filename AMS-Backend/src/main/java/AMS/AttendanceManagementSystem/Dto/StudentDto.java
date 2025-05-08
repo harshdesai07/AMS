@@ -14,6 +14,16 @@ public class StudentDto {
 		private String courseName;
 		
 		private String semester;
+		
+		private String rollNumber;
+
+		public String getRollNumber() {
+			return rollNumber;
+		}
+
+		public void setRollNumber(String rollNumber) {
+			this.rollNumber = rollNumber;
+		}
 
 		public String getStudentEmail() {
 			return studentEmail;

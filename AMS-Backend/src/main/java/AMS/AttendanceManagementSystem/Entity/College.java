@@ -17,7 +17,7 @@ public class College {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer collegeId;
+	private Long collegeId;
 	
 	@Column(nullable = false)
 	private String email;
@@ -61,11 +61,11 @@ public class College {
 		this.password = password;
 	}
 	
-	public Integer getCollegeId() {
+	public Long getCollegeId() {
 		return collegeId;
 	}
 
-	public void setCollegeId(Integer collegeId) {
+	public void setCollegeId(Long collegeId) {
 		this.collegeId = collegeId;
 	}
 	

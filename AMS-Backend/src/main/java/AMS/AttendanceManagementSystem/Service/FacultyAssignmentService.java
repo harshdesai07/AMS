@@ -1,6 +1,8 @@
 package AMS.AttendanceManagementSystem.Service;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,10 +47,11 @@ public class FacultyAssignmentService {
 		Semester sem=semr.findBysemesterNumber(fad.getSemester()).
 				orElseThrow(()->new RuntimeException("No semester Found"));
 		
-		CollegeCourseDepartmentSemesterSubject ccdss=ccdssr.findBySemesterAndSubject(sem,s).
+		CollegeCourseDepartmentSemesterSubject ccdss=ccdssr.findByCollegeCourseDepartmentAndSemesterAndSubject(f.getCollegeCourseDepartment(), sem, s).
 				orElseThrow(()->new RuntimeException("No semester or no subject found"));
 		
-		FacultyAssignment fa=new FacultyAssignment();
+		
+		FacultyAssignment fa = new FacultyAssignment();
 		
 		fa.setFaculty(f);
 		
@@ -58,5 +61,8 @@ public class FacultyAssignmentService {
 		
 	}
 	
+	public List<Subject> subjectsTaughtByAFaculty(Long facultyId, String courseName, String departmentName, String semester){
+		return far.findSubjectsByFacultyAndNames(facultyId, courseName, departmentName, semester);
+	}
 	
 }

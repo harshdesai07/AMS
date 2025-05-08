@@ -5,7 +5,7 @@ import java.util.List;
 public class CollegeCourseDepartmentDto {
 	private String courseName;
 	
-	private Integer collegeId;
+	private Long collegeId;
 	
 	private List<String> departments;
 	
@@ -28,11 +28,11 @@ public class CollegeCourseDepartmentDto {
 		this.departments = departments;
 	}
 
-	public Integer getCollegeId() {
+	public Long getCollegeId() {
 		return collegeId;
 	}
 	
-	public void setCollegeId(Integer collegeId) {
+	public void setCollegeId(Long collegeId) {
 		this.collegeId = collegeId;
 	}
 }

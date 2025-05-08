@@ -6,7 +6,8 @@ import {
   GraduationCap,
   Mail,
   Phone,
-  User
+  User,
+  Hash
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
@@ -35,6 +36,7 @@ export default function StudentRegistration() {
     countryCode: "+1",
     parentCountryCode: "+1",
     courseName: storedCourse || "",
+    rollNumber: ""
   });
 
   const [semesters, setSemesters] = useState([]);
@@ -49,7 +51,7 @@ export default function StudentRegistration() {
       });
     }
   }, []);
-  
+
   const handleClose = () => {
     navigate(-1);  // this takes you back to the previous page
   };
@@ -59,7 +61,6 @@ export default function StudentRegistration() {
       if (!phoneNumber) return "+1";
       return phoneNumber.slice(0, -10);
     };
-
 
     const extractPhoneNumber = (phoneNumber) => {
       if (!phoneNumber) return "";
@@ -77,6 +78,7 @@ export default function StudentRegistration() {
         countryCode: extractCountryCode(studentData.studentNumber),
         parentCountryCode: extractCountryCode(studentData.studentParentsNumber),
         courseName: storedCourse || "",
+        rollNumber: studentData.rollNumber || ""
       };
 
       setFormData(newFormData);
@@ -154,6 +156,11 @@ export default function StudentRegistration() {
       isValid = false;
     }
 
+    if (!formData.rollNumber.trim()) {
+      newErrors.rollNumber = "Roll number is required";
+      isValid = false;
+    }
+
     if (!formData.studentNumber.trim()) {
       newErrors.studentNumber = "Phone number is required";
       isValid = false;
@@ -202,7 +209,8 @@ export default function StudentRegistration() {
         studentParentsNumber: parentFullPhoneNumber,
         deptName: storedDepartment,
         courseName: storedCourse,
-        semester: formData.studentSem.toString()
+        semester: formData.studentSem.toString(),
+        rollNumber: formData.rollNumber
       };
 
       if (!collegeId) {
@@ -285,6 +293,30 @@ export default function StudentRegistration() {
                 </div>
                 {errors.studentName && (
                   <p className="text-red-600 text-sm mt-1">{errors.studentName}</p>
+                )}
+              </div>
+
+              {/* Roll Number field */}
+              {/* Roll Number field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Roll Number
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.rollNumber}
+                    onChange={(e) => handleChange(e.target.value, "rollNumber")}
+                    className={`w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none ${studentData ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+                      }`}
+                    placeholder="Enter roll number"
+                    disabled={!!studentData}
+                  />
+                  <Hash className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${studentData ? "text-gray-400" : "text-gray-400"
+                    }`} />
+                </div>
+                {errors.rollNumber && (
+                  <p className="text-red-600 text-sm mt-1">{errors.rollNumber}</p>
                 )}
               </div>
 

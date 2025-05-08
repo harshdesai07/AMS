@@ -14,7 +14,7 @@ import AMS.AttendanceManagementSystem.Metadata.Course;
 @Repository
 public interface CollegeCourseRepo extends JpaRepository<CollegeCourse, Long> {
 	 @Query("SELECT c FROM Course c WHERE c.id IN (SELECT cc.course.id FROM CollegeCourse cc WHERE cc.college.id = :collegeId)")
-	 List<Course> findCoursesByCollegeId(Integer collegeId);
+	 List<Course> findCoursesByCollegeId(Long collegeId);
 	 
 	 Optional<CollegeCourse> findByCollegeAndCourse(College college, Course course);
 	 

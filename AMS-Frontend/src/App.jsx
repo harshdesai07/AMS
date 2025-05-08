@@ -2,18 +2,22 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import CollegeDashboard from "./components/Dashboards/CollegeDashboard";
 import FacultyDashboard from "./components/Dashboards/FacultyDashboard";
+import HodDashboard from "./components/Dashboards/HodDashboard";
 import StudentDashboard from "./components/Dashboards/StudentDashboard";
 import HomePage from "./components/Home/HomePage";
-import CourseDepartment from "./components/data/CourseDepartment";
+import CourseDepartment from "./components/academicManagement/CourseDepartment";
+import FacultySubject from "./components/academicManagement/FacultySubject";
+import FacultyTaskScheduler from "./components/academicManagement/FacultyTaskScheduler";
+import SemesterSubject from "./components/academicManagement/SemesterSubject";
 import CollegeLogin from "./components/forms/CollegeLogin";
 import CollegeRegistration from "./components/forms/CollegeRegistration";
 import FacultyLogin from "./components/forms/FacultyLogin";
+import FacultyRegistration from "./components/forms/FacultyRegistration";
 import HodRegistration from "./components/forms/HodRegistration";
 import StudentLogin from "./components/forms/StudentLogin";
 import StudentRegistration from "./components/forms/StudentRegistration";
-import HodDashboard from "./components/Dashboards/HodDashboard";
-import SemesterSubject from "./components/data/SemesterSubject";
-import FacultyRegistration from "./components/forms/FacultyRegistration";
+import PasswordUpdate from "./components/forms/PasswordUpdate";
+import AttendanceManagement from "./components/academicManagement/AttendanceManagement";
 
 
 export default function App() {
@@ -37,6 +41,11 @@ export default function App() {
         <Route path="/CourseDepartment" element={<CourseDepartment />} />
         <Route path="/hodDashboard" element={<HodDashboard />} />
         <Route path="/semesterSubject" element={<SemesterSubject />} />
+        <Route path="assign-subject/:facultyId" element={<FacultySubject />} />
+        <Route path="facultyTaskScheduler" element={<FacultyTaskScheduler />} />
+        <Route path="/faculty/tasks" element={<FacultyTaskScheduler />} />
+        <Route path="/update-password" element={<PasswordUpdate />} />
+        <Route path="/faculty/attendance" element={<AttendanceManagement />} />
       </Routes>
     </Router>
   );

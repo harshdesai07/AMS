@@ -6,7 +6,6 @@ public class GetStudentDto {
   
 	 private String studentEmail;
 	 
-	 private String password;
 	   
 	    private String studentName;
 	    
@@ -14,13 +13,21 @@ public class GetStudentDto {
 	    
 		private String studentParentsNumber;
 		
-		
-		
 		private String deptName;
 		
 		private String courseName;
 		
 		private String semester;
+		
+		private String rollNumber;
+
+		public String getRollNumber() {
+			return rollNumber;
+		}
+
+		public void setRollNumber(String rollNumber) {
+			this.rollNumber = rollNumber;
+		}
 
 		public String getStudentEmail() {
 			return studentEmail;
@@ -54,15 +61,6 @@ public class GetStudentDto {
 			this.studentParentsNumber = studentParentsNumber;
 		}
 
-
-
-		public String getPassword() {
-			return password;
-		}
-
-		public void setPassword(String password) {
-			this.password = password;
-		}
 
 		public String getDeptName() {
 			return deptName;

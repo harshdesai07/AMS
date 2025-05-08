@@ -11,7 +11,7 @@ import AMS.AttendanceManagementSystem.Entity.Faculty;
 
 public interface FacultyRepo extends JpaRepository<Faculty,Long>{
 	@Query("SELECT f FROM Faculty f WHERE f.collegeCourseDepartment.collegeCourse.college.collegeId = :collegeId")
-	List<Faculty> findByCollegeId( Integer collegeId);
+	List<Faculty> findByCollegeId( Long collegeId);
 	
 	@Query("SELECT f.collegeCourseDepartment FROM Faculty f WHERE f.facultyId = :facultyId")
     Optional<CollegeCourseDepartment> findCollegeCourseDepartmentByFacultyId(Long facultyId);
@@ -19,7 +19,7 @@ public interface FacultyRepo extends JpaRepository<Faculty,Long>{
 	Optional<Faculty> findByFacultyEmail(String facultyEmail);
 	
 	@Query("SELECT f FROM Faculty f WHERE f.facultyDesignation = 'HOD' AND f.collegeCourseDepartment.collegeCourse.college.collegeId = :collegeId")
-	List<Faculty> findAllHodsByCollegeId(Integer collegeId);
+	List<Faculty> findAllHodsByCollegeId(Long collegeId);
 
 	@Query("SELECT f FROM Faculty f " +
 		       "WHERE f.facultyDesignation <> 'HOD' " +
@@ -27,7 +27,7 @@ public interface FacultyRepo extends JpaRepository<Faculty,Long>{
 		       "AND f.collegeCourseDepartment.collegeCourse.course.name = :courseName " +
 		       "AND f.collegeCourseDepartment.department.name = :departmentName")
 		List<Faculty> findAllFacultyExceptHodsByCollegeCourseAndDepartment(
-		        Integer collegeId, 
+		        Long collegeId, 
 		        String courseName, 
 		        String departmentName);
 

@@ -1,12 +1,13 @@
-import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ActionButtons from "../ui/ActionButtons";
+import { Toaster, toast } from "react-hot-toast";
 
 const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSubjects, setHasSubjects] = useState(true);
   const navigate = useNavigate();
   const base_url = "http://localhost:8080";
   const alertShown = useRef(false);
@@ -14,14 +15,63 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
   useEffect(() => {
     if (type && collegeId) {
       fetchData();
+      if (userRole === 'HOD') {
+        checkSubjects(); 
+      }
     } else {
       setData([]); // Clear data when type or collegeId is not available
     }
-  }, [type, collegeId]);
+  }, [type, collegeId, userRole]);
+
+  const checkSubjects = async () => {
+    try {
+      const response = await axios.get(`${base_url}/getSubjectsSemesterwise/${collegeId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          courseName: localStorage.getItem("hodCourse"),
+          departmentName: localStorage.getItem("hodDepartment"),
+        },
+      });
+
+      
+      const result = response.data;
+      if (!result || result.length === 0) {
+        console.log("No subjects found for this course and department");
+        setHasSubjects(false);
+      } else {
+        console.log("Subjects found:", result);
+        setHasSubjects(true);
+      }
+    } catch (error) {
+      console.error("Error checking subjects:", error);
+      setHasSubjects(false);
+    }
+  };
+  
+  const handleSendFeeEmail = async (student) => {
+    try {
+      const response = await axios.post(
+        `${base_url}/feesReminder/${student.studentId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      const result = response.data;
+      toast.success(result.message || "Fee email sent successfully");
+    } catch (error) {
+      console.error("Error sending fee email:", error);
+      toast.error(error.response?.data?.message || "Failed to send fee email");
+    }
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
-    setData([]); // Clear previous data before fetching
     alertShown.current = false;
 
     try {
@@ -36,9 +86,10 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
 
       switch (type) {
         case "student":
-          response = await axios.get(`${base_url}/get${type}/${collegeId}`, {
+          response = await axios.get(`${base_url}/get${type}/${collegeId}/${userRole}`, {
             headers: commonHeaders,
             params: commonParams,
+            
           });
           break;
         case "faculty":
@@ -46,13 +97,29 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
             headers: commonHeaders,
             params: commonParams,
           });
+          console.log("Faculty data:", response.data);
+          console.log("User role:", userRole);
+          console.log("College ID:", collegeId);
+          console.log("type", type)
           break;
         case "subjects":
           response = await axios.get(`${base_url}/getSubjectsSemesterwise/${collegeId}`, {
             headers: commonHeaders,
             params: commonParams,
           });
-          break;
+          const subjectsData = response.data;
+          setData(Array.isArray(subjectsData) ? subjectsData : []);
+          setHasSubjects(Array.isArray(subjectsData) && subjectsData.length > 0);
+          setIsLoading(false);
+          
+          if (!subjectsData || subjectsData.length === 0) {
+            if (!alertShown.current) {
+              alertShown.current = true;
+              onNoRecords(type);
+            }
+          }
+          return;
+          
         case "courseDepartment":
           response = await axios.get(`${base_url}/getCoursesAndDepartments/${collegeId}`, {
             headers: commonHeaders,
@@ -64,22 +131,16 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
           return;
       }
 
-      const result = await response.data;
+      const result = response.data;
       const resultArray = Array.isArray(result) ? result : [result];
 
-      if (type === 'subjects') {
-        // Ensure subjects data has the correct structure
-        const validSubjectsData = resultArray.filter(semester => 
-          semester && semester.semester && Array.isArray(semester.subjects)
-        );
-        setData(validSubjectsData);
-      } else if (type === 'courseDepartment') {
-        // Ensure course-department data is correctly structured
+      if (type === 'courseDepartment') {
         const validCourseDepartmentData = resultArray.filter(course => 
           course && course.courseName && Array.isArray(course.departments)
         );
         setData(validCourseDepartmentData);
-      } else {
+      } else if (type === 'faculty' || type === 'student') {
+        // Process faculty or student data
         const transformedData = type === 'faculty' ? resultArray.map(faculty => ({
           facultyId: faculty.facultyId,
           facultyName: faculty.facultyName,
@@ -92,18 +153,23 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
         })) : resultArray;
 
         setData(transformedData || []);
-      }
-
-      if (!resultArray || resultArray.length === 0) {
-        if (!alertShown.current) {
-          alertShown.current = true;
-          onNoRecords(type);
+        
+        // Only notify about no records, but still keep the data state as is
+        if (!resultArray || resultArray.length === 0) {
+          if (!alertShown.current) {
+            alertShown.current = true;
+            onNoRecords(type);
+          }
         }
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      setData([]);
-
+      
+      // Important: Only set data to empty for non-faculty types when error occurs
+      if (type !== 'faculty') {
+        setData([]);
+      }
+      
       if (!alertShown.current) {
         alertShown.current = true;
         onNoRecords(type);
@@ -187,6 +253,10 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
     );
   };
 
+  const handleAssignSubject = (faculty) => {
+    navigate(`/assign-subject/${faculty.facultyId}?name=${encodeURIComponent(faculty.facultyName)}`);
+  };
+
   const extractTextInBrackets = (text) => {
     const match = text?.match(/\((.*?)\)/);
     return match ? match[1] : text;
@@ -201,8 +271,13 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
   }
 
   const renderSubjectsTable = () => {
-    // Early return if data is not an array or is empty
-    if (!Array.isArray(data) || data.length === 0) return null;
+    if (!Array.isArray(data) || data.length === 0) {
+      return (
+        <div className="text-center py-8 bg-gray-50 border border-gray-200 rounded-md">
+          <p className="text-gray-500">No subjects available. Please add subjects first.</p>
+        </div>
+      );
+    }
 
     return (
       <>
@@ -241,8 +316,13 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
   };
 
   const renderCourseDepartmentTable = () => {
-    // Early return if data is not an array or is empty
-    if (!Array.isArray(data) || data.length === 0) return null;
+    if (!Array.isArray(data) || data.length === 0) {
+      return (
+        <div className="text-center py-8 bg-gray-50 border border-gray-200 rounded-md">
+          <p className="text-gray-500">No course-department data available.</p>
+        </div>
+      );
+    }
 
     return (
       <>
@@ -282,7 +362,20 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
 
   const renderDataTable = () => {
     const validType = type === "student" || type === "faculty" ? type : null;
-    if (!validType || !Array.isArray(data) || data.length === 0) return null;
+    
+    // Important change: Only return null if validType is null, not if data is empty
+    if (!validType) return null;
+    
+    // Show empty state message if no data
+    if (!Array.isArray(data) || data.length === 0) {
+      return (
+        <div className="text-center py-8 bg-gray-50 border border-gray-200 rounded-md">
+          <p className="text-gray-500">
+            No {validType === "student" ? "students" : "faculty"} available.
+          </p>
+        </div>
+      );
+    }
 
     const columns = {
       student: [
@@ -331,13 +424,13 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
     return (
       <>
         <div className="flex items-center justify-between px-4 py-3 bg-gray-100 text-gray-800">
-        <h2 className="text-lg font-semibold">
-  {userRole === "COLLEGE"
-    ? "HOD List"
-    : validType === "student"
-    ? "Student List"
-    : "Faculty List"}
-</h2>
+          <h2 className="text-lg font-semibold">
+            {userRole === "COLLEGE"
+              ? "HOD List"
+              : validType === "student"
+              ? "Student List"
+              : "Faculty List"}
+          </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -371,6 +464,11 @@ const CollegeDataTable = ({ type, collegeId, onNoRecords, token, userRole }) => 
                     <ActionButtons
                       onUpdate={() => handleUpdate(item)}
                       onDelete={() => handleDelete(item)}
+                      onAssignSubject={userRole === 'HOD' && type === 'faculty' ? () => handleAssignSubject(item) : null}
+                      onSendFeeEmail={type === 'student' ? () => handleSendFeeEmail(item) : null}
+                      disableAssignSubject={!hasSubjects} 
+                      assignSubjectTooltip={!hasSubjects ? "Add subjects first" : ""} 
+                      isStudent={type === 'student'}
                     />
                   </td>
                 </tr>

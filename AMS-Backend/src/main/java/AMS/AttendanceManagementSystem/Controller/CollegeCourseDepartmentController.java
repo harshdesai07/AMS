@@ -49,7 +49,7 @@ public class CollegeCourseDepartmentController {
 	
 //	get all department by college id and course name for particular college and course	
 	@GetMapping("/getDepartments/{collegeId}/{courseName}")
-	public ResponseEntity<?> getDepartmentByCollegeidAndCourseName(@PathVariable Integer collegeId,@PathVariable String courseName){
+	public ResponseEntity<?> getDepartmentByCollegeidAndCourseName(@PathVariable Long collegeId,@PathVariable String courseName){
 
 		List<Department> ans=ccds.findDepartment(collegeId, courseName);
 		
@@ -63,7 +63,7 @@ public class CollegeCourseDepartmentController {
 	
 	//get all the courses and departments offered by college
 	@GetMapping("/getCoursesAndDepartments/{collegeId}")
-	public ResponseEntity<?> getCoursesDepartmentsByCollege(@PathVariable Integer collegeId){
+	public ResponseEntity<?> getCoursesDepartmentsByCollege(@PathVariable Long collegeId){
 		HashMap<String, String> response = new HashMap<>();
 		
 		try {

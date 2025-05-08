@@ -15,7 +15,7 @@ public class CollegeCourseService {
 	private CollegeCourseRepo ccr;
 	
 	//find the list of course offered by college
-	public List<Course> findCourseByCollegeId(Integer collegeId){
+	public List<Course> findCourseByCollegeId(Long collegeId){
 		return ccr.findCoursesByCollegeId(collegeId);
 	}
 	

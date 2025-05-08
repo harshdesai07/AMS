@@ -68,7 +68,7 @@ public class StudentEnrollmentService {
 
 	// Saves the student data --> update Student table and StudentEnrollment table
 	@Transactional
-	public void saveStudentDetails(StudentDto sd, Integer collegeId) {
+	public void saveStudentDetails(StudentDto sd, Long collegeId) {
 		//generate and hash the password
 		String rawPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         String hashedPassword = passwordEncoder.encode(rawPassword);
@@ -114,7 +114,8 @@ public class StudentEnrollmentService {
 		StudentEnrollment se = new StudentEnrollment();
 		se.setStudent(student);
 		se.setCollegeCourseDepartment(collegeCourseDepartment);
-		se.setSemesterMetadata(semester);
+		se.setSemester(semester);
+		se.setRollNumber(sd.getRollNumber());
 
 		ser.save(se);
 		
@@ -126,7 +127,7 @@ public class StudentEnrollmentService {
 					student.getStudentParentsNumber(),
 					se.getCollegeCourseDepartment().getDepartment().getName(),
 					se.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName(),
-					se.getSemesterMetadata().getSemesterNumber(),
+					se.getSemester().getSemesterNumber(),
 					rawPassword,
 					college.getCollegeName(),
 					college.getEmail(),
@@ -164,7 +165,7 @@ public class StudentEnrollmentService {
 					.orElseThrow(() -> new RuntimeException("Semester not found with: " + sd.getSemester()));
 
 			// Update the semester in StudentEnrollment
-			studentEnrollment.setSemesterMetadata(semester);
+			studentEnrollment.setSemester(semester);
 		
 
 		// 5. Update student details in the DTO
@@ -186,7 +187,7 @@ public class StudentEnrollmentService {
 					student.getStudentParentsNumber(),
 					studentEnrollment.getCollegeCourseDepartment().getDepartment().getName(),
 					studentEnrollment.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName(),
-					studentEnrollment.getSemesterMetadata().getSemesterNumber(),
+					studentEnrollment.getSemester().getSemesterNumber(),
 					collegeCourseDepartment.getCollegeCourse().getCollege().getCollegeName(),
 					collegeCourseDepartment.getCollegeCourse().getCollege().getEmail(),
 					"📋 Please Confirm Your Updated Personal Details");
@@ -205,57 +206,66 @@ public class StudentEnrollmentService {
 		sr.deleteById(studentId);
 	}
 
-//		get all student based on college and course and department
-	public List<GetStudentDto> findStudents(Integer collegeId, String courseName, String departmentName) {
+//	get all student based on college and course and department
+public List<GetStudentDto> findStudents(Long collegeId, String courseName, String departmentName,String semester,String source) {
 
-//			finding by college id
-		List<StudentEnrollment> ls = ser.findEnrollmentsByCollegeCourseAndDepartment(collegeId, courseName, departmentName);
+	List<StudentEnrollment> ls=new ArrayList<>();
+	
+//		finding by college id
+	if(source.equals("HOD")) {
+	 ls= ser.findEnrollmentsByCollegeCourseAndDepartment(collegeId, courseName, departmentName);
+	}
+	
+	else {
+		ls=ser.findByCollegeAndCourseAndDepartmentAndSemester(collegeId, courseName, departmentName, semester);
+	}
+	
+	
+//	storing student dto list
+	List<GetStudentDto> res = new ArrayList<>();
 
-//		storing student dto list
-		List<GetStudentDto> res = new ArrayList<>();
+	for (int i = 0; i < ls.size(); i++) {
 
-		for (int i = 0; i < ls.size(); i++) {
+//		taking out student Enrollment object from list ls
+		StudentEnrollment se = ls.get(i);
 
-//			taking out student Enrollment object from list ls
-			StudentEnrollment se = ls.get(i);
+//		student from student enrollment
+		Student s = se.getStudent();
 
-//			student from student enrollment
-			Student s = se.getStudent();
+		GetStudentDto sdto = new GetStudentDto();
+//      taking out CollegeCourseDepartment from student Enrollement
+		CollegeCourseDepartment ccd = se.getCollegeCourseDepartment();
+//      taking out 	CollegeCourse from	CollegeCourseDepartment	
+		CollegeCourse cc = ccd.getCollegeCourse();
+//		taking out course from college course
+		Course c = cc.getCourse();
+//		taking out department from CollegeCourseDepartment
+		Department d = ccd.getDepartment();
+//		taking out semester from StudentEnrollment
+		Semester sem = se.getSemester();
 
-			GetStudentDto sdto = new GetStudentDto();
-//          taking out CollegeCourseDepartment from student Enrollement
-			CollegeCourseDepartment ccd = se.getCollegeCourseDepartment();
-//          taking out 	CollegeCourse from	CollegeCourseDepartment	
-			CollegeCourse cc = ccd.getCollegeCourse();
-//			taking out course from college course
-			Course c = cc.getCourse();
-//			taking out department from CollegeCourseDepartment
-			Department d = ccd.getDepartment();
-//			taking out semester from StudentEnrollment
-			Semester sem = se.getSemesterMetadata();
+//		now saving all detail of student in student dto and then returning 
+		sdto.setCourseName(c.getName());
+		sdto.setDeptName(d.getName());
+		sdto.setSemester(sem.getSemesterNumber());
+		sdto.setStudentEmail(s.getStudentEmail());
+		sdto.setStudentName(s.getStudentName());
+		sdto.setStudentNumber(s.getStudentNumber());
+		sdto.setStudentParentsNumber(s.getStudentParentsNumber());
+		sdto.setStudentId(s.getStudentId());
+		sdto.setRollNumber(se.getRollNumber());
+		
 
-//			now saving all detail of student in student dto and then returning 
-			sdto.setCourseName(c.getName());
-			sdto.setDeptName(d.getName());
-			sdto.setSemester(sem.getSemesterNumber());
-			sdto.setStudentEmail(s.getStudentEmail());
-			sdto.setStudentName(s.getStudentName());
-			sdto.setStudentNumber(s.getStudentNumber());
-			sdto.setStudentParentsNumber(s.getStudentParentsNumber());
-			sdto.setPassword(s.getStudentPassword());
-			sdto.setStudentId(s.getStudentId());
-
-			res.add(sdto);
-
-		}
-
-		return res;
+		res.add(sdto);
 
 	}
 
+	return res;
+
+}
 	// add student detail from excel sheet
 	@Transactional
-	public void saveStudentFromExcel(MultipartFile file, Integer id) {
+	public void saveStudentFromExcel(MultipartFile file, Long id) {
 		//generate and hash the password
 		String rawPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         String hashedPassword = passwordEncoder.encode(rawPassword);
@@ -309,7 +319,8 @@ public class StudentEnrollmentService {
 			// 6. save data
 			se.setStudent(student);
 			se.setCollegeCourseDepartment(collegeCourseDepartment);
-			se.setSemesterMetadata(semester);
+			se.setSemester(semester);
+			se.setRollNumber(row.get("roll number"));
 
 			ser.save(se);
 			
@@ -321,7 +332,7 @@ public class StudentEnrollmentService {
 						student.getStudentParentsNumber(),
 						se.getCollegeCourseDepartment().getDepartment().getName(),
 						se.getCollegeCourseDepartment().getCollegeCourse().getCourse().getName(),
-						se.getSemesterMetadata().getSemesterNumber(),
+						se.getSemester().getSemesterNumber(),
 						rawPassword,
 						college.getCollegeName(),
 						college.getEmail(),

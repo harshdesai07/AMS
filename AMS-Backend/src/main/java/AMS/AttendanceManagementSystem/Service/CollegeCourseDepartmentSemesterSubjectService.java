@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,8 @@ public class CollegeCourseDepartmentSemesterSubjectService {
 		String sheetName = ExcelReader.getExcelSheetName(file); // read sheet name
 
 		List<Map<String, String>> excelData = ExcelReader.readExcelSheet(file, sheetName);
+		System.out.println("Excel Data: " + excelData);
+
 
 		// 1. find faculty by email
 		Faculty faculty = fr.findByFacultyEmail(email)
@@ -253,14 +256,14 @@ public class CollegeCourseDepartmentSemesterSubjectService {
 	}
 	
 	// find all subjects semester wise for a particular college and department
-	public List<SubjectDto> findAllSubjectsBySemester(Integer collegeId, String courseName,
+	public List<SubjectDto> findAllSubjectsBySemester(Long collegeId, String courseName,
 			String departmentName) {
 			
 		// 1. Execute the query to get raw data
 	    List<Object[]> rawResults = ccdssr.findSemesterSubjectsByCollegeCourseAndDepartment(
 	            collegeId, courseName, departmentName);
 	    
-	    if(rawResults.isEmpty()) throw new RuntimeException("No data found!");
+	    if(rawResults.isEmpty()) return Collections.emptyList();;
 	    
 	    // 2. Group by semester name 
 	    //key -> semester, value -> subjects
